@@ -3,7 +3,7 @@
 #  $Source: /opt/cvsroot/projects/Spamity/scripts/create_tables.pl,v $
 #  $Name:  $
 #
-#  Copyright (c) 2006, 2007
+#  Copyright (c) 2006, 2007, 2008
 #
 #  Author: Francis Lachapelle <francis@Sophos.ca>
 #
@@ -109,8 +109,8 @@ $postdrop{'oracle'} =
 
 my %postcreate;
 $postcreate{'pgsql'} =
-    [ 'CREATE INDEX spamity_%s_logdate_index ON spamity_%s (logdate)',
-      'CREATE INDEX spamity_%s_username_index ON spamity_%s (username)' ];
+    [ 'CREATE INDEX %s_logdate_index ON %s (logdate)',
+      'CREATE INDEX %s_username_index ON %s (username)' ];
 $postcreate{'oracle'} =
     [ 'CREATE SEQUENCE seq_%s_id
         START WITH 1
@@ -178,8 +178,8 @@ foreach $i (@table_suffixes) {
     if ($create) {
         print "Creating table $tablename\n";
         die $db->dbh->errstr unless $db->dbh->do(sprintf($sqlcreate{$db->{_module}}, $tablename));
-        die $db->dbh->errstr unless $db->dbh->do(sprintf("CREATE INDEX spamity_%s_logdate_index on %s (logdate)",$i,$tablename));
-        die $db->dbh->errstr unless $db->dbh->do(sprintf("CREATE INDEX spamity_%s_username_index on %s (username)",$i,$tablename));
+        #die $db->dbh->errstr unless $db->dbh->do(sprintf("CREATE INDEX spamity_%s_logdate_index on %s (logdate)",$i,$tablename));
+        #die $db->dbh->errstr unless $db->dbh->do(sprintf("CREATE INDEX spamity_%s_username_index on %s (username)",$i,$tablename));
         if ($postcreate{$db->{_module}}) {
             foreach (@{$postcreate{$db->{_module}}}) {
                 my $stmt = $_; $stmt =~ s/%s/$tablename/g; print "$stmt\n";

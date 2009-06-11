@@ -329,7 +329,7 @@ foreach $path (@PATHS) {
 # Filter type : access username (via postfix check_sender_access)
 # Filter id   : (rejected username)
 #*********************************************************************
-            elsif (m/^($date) (.*)$hostname.*(?:reject|discard): RCPT .*<(.*?)>: Sender address rejected: (.+?); from=<(?:(.*?)@)?(.*?)> to=((?:<(?:.*?@)?.*?>,?)+)/) {
+            elsif (m/^($date) (.*)$hostname.*(?:reject|discard): RCPT .*<(.*?)>: (Sender address .+?); from=<(?:(.*?)@)?(.*?)> to=((?:<(?:.*?@)?.*?>,?)+)/) {
 		($spam_date, $from_user, $from_host, $filter_type, $filter_id, $description) =
                     (&buildDate($year,$1,$2), $5, $6, 'access username', $3, $4);
 		@to = &parseAddresses($7);
@@ -459,7 +459,8 @@ foreach $path (@PATHS) {
 				    $count_sth{$key} = 1;
 				}
 
-				unless ($select_sth{$key}->bind_param(1, $spam_date) &&
+				unless ($select_sth{$key} &&
+					$select_sth{$key}->bind_param(1, $spam_date) &&
 					$select_sth{$key}->bind_param(2, $username) &&
 					$select_sth{$key}->bind_param(3, lc(substr($to_user,0,64)) || '_') &&
 					$select_sth{$key}->bind_param(4, lc(substr($to_host,0,64)) || '_') &&
@@ -472,7 +473,7 @@ foreach $path (@PATHS) {
 				    next;
 				}
 				
-				if ($select_sth{$key}->execute()) {
+				if ($select_sth{$key} && $select_sth{$key}->execute()) {
 				    if ($select_sth{$key}->fetchrow_arrayref) {
 					warn "[DEBUG SQL] $spam_date Entry exist; don't insert data ($key)\n" if (int(&Spamity::conf('log_level')) > 0);
 					$select_sth{$key}->finish;
@@ -485,7 +486,8 @@ foreach $path (@PATHS) {
 				    next;
 				}
 				
-				unless ($insert_sth{$key}->bind_param(1, $spam_date) &&
+				unless ($insert_sth{$key} &&
+					$insert_sth{$key}->bind_param(1, $spam_date) &&
 					$insert_sth{$key}->bind_param(2, $username) &&
 					$insert_sth{$key}->bind_param(3, $hostname) &&
 					$insert_sth{$key}->bind_param(4, lc(substr($to_user,0,64)) || '_') &&
@@ -501,7 +503,7 @@ foreach $path (@PATHS) {
 				    next;
 				}
 
-				if ($insert_sth{$key}->execute()) {
+				if ($insert_sth{$key} && $insert_sth{$key}->execute()) {
 				    warn "[DEBUG SQL] insert in table ".sprintf('%7s', $key)." ($spam_date, $username)\n" if (int(&Spamity::conf('log_level')) > 0);
 				    last;
 				}

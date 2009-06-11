@@ -1,4 +1,27 @@
-2007-07-12	Francis Lachapelle <francis@Sophos.ca>
+2007-10-29 Francis Lachapelle <francis@Sophos.ca>
+
+	* Improved parsing for check_sender_access maps.
+
+2007-10-15 Francis Lachapelle <francis@Sophos.ca>
+
+	* Added calls to finish on statement handles for 
+	scripts/sessions_maintenance_sql.pl.
+	
+2007-08-07 Francis Lachapelle <francis@Sophos.ca>
+
+	* Improved error handling of scripts/sessions_maintenance_sql.pl.
+
+2007-08-02 Francis Lachapelle <francis@Sophos.ca>
+
+	* Improved database statement handler validation in
+	  sbin/spamityd.
+
+2007-07-13 Francis Lachapelle <francis@Sophos.ca>
+
+	* Improved plugins/munin/spamity for better database
+	  portability.
+
+2007-07-12 Francis Lachapelle <francis@Sophos.ca>
 
 	* Added support for CGI::Session::Oracle.
 	* Fixed SQL query in function getPeriodByDay in 
@@ -7,11 +30,11 @@
 	  scripts/create_tables.pl.
 	* Tagged CVS branch to v0.9.6.
 	
-2007-07-10	Francis Lachapelle <francis@Sophos.ca>
+2007-07-10 Francis Lachapelle <francis@Sophos.ca>
 
 	* Added support for custom port number for Oracle databases.
 
-2007-07-06	Francis Lachapelle <francis@Sophos.ca>
+2007-07-06 Francis Lachapelle <francis@Sophos.ca>
 
 	* Removed references to the 'date' binary in sbin/spamityd in
 	  order to improve portability.
@@ -24,7 +47,7 @@
 	* Improved french translation.
 	* Improved URL and language handling in CGI scripts.
 	
-2007-07-05	Francis Lachapelle <francis@Sophos.ca>
+2007-07-05 Francis Lachapelle <francis@Sophos.ca>
 	
 	* Added support to define environment variables in
 	  configuration file.
@@ -48,11 +71,11 @@
 	* Added verification of some configuration file parameters at
 	  startup in sbin/spamityd.
 
-2007-06-29	Francis Lachapelle <francis@Sophos.ca>
+2007-06-29 Francis Lachapelle <francis@Sophos.ca>
 
 	* Added minimum date to scripts/stats.pl.
 
-2007-03-09	Francis Lachapelle <francis@Sophos.ca>
+2007-03-09 Francis Lachapelle <francis@Sophos.ca>
 
 	* Fixed syntax error in lib/Spamity/Web.pm (thanks Bryan!).
 	  This error was causing the month view graph to use all
@@ -62,7 +85,7 @@
 	* Added full version to HTML footer template.
 	* Tagged CVS branch to v0.9.5.
 
-2007-01-19	Francis Lachapelle <francis@Sophos.ca>
+2007-01-19 Francis Lachapelle <francis@Sophos.ca>
 
 	* Fixed syntax error in lib/Spamity.pm.
 	* Added guessing of log year to avoid dates in future 
@@ -72,12 +95,12 @@
 	  having executed a prepared statement a maximum number of
 	  times in sbin/spamityd.
 
-2007-01-03	Francis Lachapelle <francis@Sophos.ca>
+2007-01-03 Francis Lachapelle <francis@Sophos.ca>
 
 	* Fixed spamityd so prepared statements are initialized
 	  when reconnecting to the database (thanks Luca!).
 	
-2007-01-03	Francis Lachapelle <francis@Sophos.ca>
+2007-01-03 Francis Lachapelle <francis@Sophos.ca>
 
 	* Fixed redirection path bug in cgi-bin/login.cgi.
 	* Added munin plugin.
@@ -86,43 +109,43 @@
 	* Updated RPM spec file.
 	* Tagged CVS branch to v0.9.4.
 	
-2006-11-21	Francis Lachapelle <francis@Sophos.ca>
+2006-11-21 Francis Lachapelle <francis@Sophos.ca>
 
 	* Modified spamityd to not log greylisting (tested with
 	  the default configuration of Postgrey).
 
-2006-10-03	Francis Lachapelle <francis@Sophos.ca>
+2006-10-03 Francis Lachapelle <francis@Sophos.ca>
 
 	* Updated RELEASE_NOTES.
 	* Updated RPM spec file.
 	* Tagged CVS branch to v0.9.3.
 
-2006-09-18	Francis Lachapelle <francis@Sophos.ca>
+2006-09-18 Francis Lachapelle <francis@Sophos.ca>
 
 	* Fixed syntax error in lib/Spamity/Authentication/ldap.pm.
 	* Escaped pattern metacharacters in regexp of 
 	  lib/Spamity/Lookup/file.pm.
 
-2006-08-18	Francis Lachapelle <francis@Sophos.ca>
+2006-08-18 Francis Lachapelle <francis@Sophos.ca>
 
 	* Added call to reconnect when execute statement failed in 
 	  spamityd.
 	* Fixed regexp in spamityd for messages rejected by a RBL.
 
-2006-08-14	Francis Lachapelle <francis@Sophos.ca>
+2006-08-14 Francis Lachapelle <francis@Sophos.ca>
 
 	* When receiving a HUP signal, spamityd re-opens its logfile
 	  (as well as the maillog file).
 	* Added debugging of Net::SMTP in lib/Spamity/Quarantine.pm 
 	  wrt to log_level.
 	
-2006-08-07	Francis Lachapelle <francis@Sophos.ca>
+2006-08-07 Francis Lachapelle <francis@Sophos.ca>
 
 	* Fixed Javascript bug so popup window of rawsource can be 
 	  properly open with Internet Explorer. The name of the window
 	  contained illegal characters (':').
 
-2006-08-03	Francis Lachapelle <francis@Sophos.ca>
+2006-08-03 Francis Lachapelle <francis@Sophos.ca>
 
 	* Fixed bug in lib/Spamity/Quarantine.pm and
 	  cgi-bin/rawsource.cgi that did not allowed to view blocked
@@ -130,28 +153,28 @@
 	* Corrected names of SQL files in spamity.spec.
 	* Tagged CVS branch to v0.9.2.
 
-2006-07-24	Francis Lachapelle <francis@Sophos.ca>
+2006-07-24 Francis Lachapelle <francis@Sophos.ca>
 
 	* Added RELEASE_NOTES.
 	* Improved scripts/multiple_tables.pl.
 	* Improved spamity.spec.
 
-2006-07-11	Francis Lachapelle <francis@Sophos.ca>
+2006-07-11 Francis Lachapelle <francis@Sophos.ca>
 
 	* Fixed bug in lib/Spamity/Web.pm.
 
-2006-06-28	Francis Lachapelle <francis@Sophos.ca>
+2006-06-28 Francis Lachapelle <francis@Sophos.ca>
 
 	* Added scripts/spamity_maintenance_sql.pl.
 	* Improved README.
 
-2006-06-22	Francis Lachapelle <francis@Sophos.ca>
+2006-06-22 Francis Lachapelle <francis@Sophos.ca>
 
 	* Added scripts/stats.pl.
 	* Added definition of session table for CGI::Session 
 	  version >= 4.x for PostgreSQL.
 
-2006-06-01	Francis Lachapelle <francis@Sophos.ca>
+2006-06-01 Francis Lachapelle <francis@Sophos.ca>
 
 	* Added 'ColumnType' parameter to web session handler when
 	  using a database (fixes problem with latest version of 
@@ -159,7 +182,7 @@
 	* Fixed syntax error in stats.cgi.
 	* Improved logging in module Web.pm.
 
-2006-05-29	Francis Lachapelle <francis@Sophos.ca>
+2006-05-29 Francis Lachapelle <francis@Sophos.ca>
 
 	* Added logging of modules versions in spamityd.
 	* Fixed missing 'eval' in Database.pm for functions
@@ -173,7 +196,7 @@
 	* Improved comments of configuration file etc/spamity.conf.
 	* Updated table definition files with new column 'host'.
 
-2006-05-24	Francis Lachapelle <francis@Sophos.ca>
+2006-05-24 Francis Lachapelle <francis@Sophos.ca>
 
 	* Cleanup authentication modules (imap and ldap); removed
 	  parameter 'imap_server' and added documention in Pod format.
@@ -184,13 +207,13 @@
 	  requirement on big table index).
 	* Improved modules loading in spamityd.
 
-2006-05-23	Francis Lachapelle <francis@Sophos.ca>
+2006-05-23 Francis Lachapelle <francis@Sophos.ca>
 
 	* Redesigned Database.pm as an object.
 	* Redesigned Lookup.pm (added support for "maps", multiple
 	  sources for a lookup table).
 
-2006-05-15	Francis Lachapelle <francis@Sophos.ca>
+2006-05-15 Francis Lachapelle <francis@Sophos.ca>
 
 	* Changed lookup parameters by 'lookup_username_maps', 
 	  'lookup_local_username_maps', 'lookup_address_maps', and
@@ -200,7 +223,7 @@
 	* Added support for multiple tables; modifications made to
 	  Quarantine.pm, Web.pm, spamityd, ..
 
-2006-05-13	Francis Lachapelle <francis@Sophos.ca>
+2006-05-13 Francis Lachapelle <francis@Sophos.ca>
 
 	* Removed index on multiple columns of SQL table.
 	* Added 'start_page' and 'admin_start_page' parameters.
@@ -209,73 +232,73 @@
 	* Replaced account by domain in web search form and added
 	  a username field for administrators.
 
-2006-05-12	Francis Lachapelle <francis@Sophos.ca>
+2006-05-12 Francis Lachapelle <francis@Sophos.ca>
 
 	* Added the sid column to sessions SQL files.
 	* Added function userKey in module Spamity.pm.
 	* Added function formatUnion in module Database.pm.
 
-2006-03-21	Francis Lachapelle <francis@Sophos.ca>
+2006-03-21 Francis Lachapelle <francis@Sophos.ca>
 
 	* Removed unecessary argument in function getGraphByUser of
 	  module Web.pm.
 	* Disabled PrintError in Database.pm.
 	* Fixed erroneous rights in RPM spec file.
 	
-2006-02-10	Francis Lachapelle <francis@Sophos.ca>
+2006-02-10 Francis Lachapelle <francis@Sophos.ca>
 
 	* Fixed syntax error in module Authentication/ldap.pm.
 	* Removed "use strict" and "use warnings".
 
-2006-01-30	Francis Lachapelle <francis@Sophos.ca>
+2006-01-30 Francis Lachapelle <francis@Sophos.ca>
 
 	* Improved CSS.
 	* Improved function getDomains of module Lookup/file.pm.
 
-2006-01-26	Francis Lachapelle <francis@Sophos.ca>
+2006-01-26 Francis Lachapelle <francis@Sophos.ca>
 
 	* Fixed bug with Quarantine.pm when a message has multiple
 	  recipients (thanks Phil!).
 
-2006-01-03	Francis Lachapelle <francis@Sophos.ca>
+2006-01-03 Francis Lachapelle <francis@Sophos.ca>
 
 	* Renamed init.d/spamityd.unix to init.d/spamityd.sh.
 	* Added init.d/spamityd.sh.
 	* Added RPM spec file.
 
-2006-01-02	Francis Lachapelle <francis@Sophos.ca>
+2006-01-02 Francis Lachapelle <francis@Sophos.ca>
 
 	* Improved logging.
 	* Improved lookup LDAP queries.
 	* Added authentication support through IMAP/SSL.
 	* Improved spamityd comments and improved/removed old regexps.
 
-2005-11-26	Francis Lachapelle <francis@Sophos.ca>
+2005-11-26 Francis Lachapelle <francis@Sophos.ca>
 
 	* login.cgi lowercases the username.
 	* Added $VERSION to Spamity.pm.
 	* Changed modules extensions from .pl to .pm
 	  - must checkout!
 
-2005-11-17	Francis Lachapelle <francis@Sophos.ca>
+2005-11-17 Francis Lachapelle <francis@Sophos.ca>
 
 	* Changed "top 20" results URLs so that the query
 	  is sorted by date.
 
-2005-11-02	Francis Lachapelle <francis@Sophos.ca>
+2005-11-02 Francis Lachapelle <francis@Sophos.ca>
 
 	* Fixed error with user graph (thanks Phil!).
 	* Fixed row ids in result tables.
 
-2005-10-07	Francis Lachapelle <francis@Sophos.ca>
+2005-10-07 Francis Lachapelle <francis@Sophos.ca>
 
 	* Force email db field for amavisd-new to be lower case.
 
-2005-10-05	Francis Lachapelle <francis@Sophos.ca>
+2005-10-05 Francis Lachapelle <francis@Sophos.ca>
 
 	* Added support for gziped banned-file quarantined messages.
 
-2005-10-03	Francis Lachapelle <francis@Sophos.ca>
+2005-10-03 Francis Lachapelle <francis@Sophos.ca>
 
 	* Added missing translations ('messages found').
 	* Changed default value of quarantine_path.
@@ -284,7 +307,7 @@
 	* Added graceful database disconnection in spamityd.
 	* Fixed incorrect row id values of search templates.
 
-2005-09-07	Francis Lachapelle <francis@Sophos.ca>
+2005-09-07 Francis Lachapelle <francis@Sophos.ca>
 
 	* Fixed apparence of preferences template when no address
 	  is associated to current user.
@@ -292,7 +315,7 @@
 	* Fixed default values for amavisd-new preferences.
 	* Fixed days order for statistics summary.
 
-2005-08-26	Francis Lachapelle <francis@Sophos.ca>
+2005-08-26 Francis Lachapelle <francis@Sophos.ca>
 
 	* Improved daemonization of daemon!
 	* Added init scripts for daemon.
@@ -300,14 +323,14 @@
 	  stats.cgi and search.cgi.
 	* Tagged CVS branch to v0.9.0.
 
-2005-08-25	Francis Lachapelle <francis@Sophos.ca>
+2005-08-25 Francis Lachapelle <francis@Sophos.ca>
 
 	* Integrated rawsource template with new design.
 	* Improved help section.
 	* Added call to 'flush' function to session object,
 	  required when using a database handler for sessions.
 
-2005-08-24	Francis Lachapelle <francis@Sophos.ca>
+2005-08-24 Francis Lachapelle <francis@Sophos.ca>
 
 	* Improved HTTP/HTTPS redirections. Removed the url parameter
 	  in the configuration file.
@@ -323,26 +346,26 @@
 	* Renamed configuration parameter 'named_path' to
 	  'mail_domains_path'.
 
-2005-07-28	Francis Lachapelle <francis@Sophos.ca>
+2005-07-28 Francis Lachapelle <francis@Sophos.ca>
 
 	* Improved HTTP/HTTPS redirections.
 	
-2005-07-19	Francis Lachapelle <francis@Sophos.ca>
+2005-07-19 Francis Lachapelle <francis@Sophos.ca>
 
 	* Fixed SQL statement in Web.pm.
 	* Improved parser (multiple recipients).
 	
-2005-06-28	Francis Lachapelle <francis@Sophos.ca>
+2005-06-28 Francis Lachapelle <francis@Sophos.ca>
 
 	* Added LDAP SSL support (Authentication and Lookup).
 	* Fixed SQL error in PostgreSQL support.
 	* Improved support for AMaViSd-new 2.3.x.
 
-2005-06-14	Francis Lachapelle <francis@Sophos.ca>
+2005-06-14 Francis Lachapelle <francis@Sophos.ca>
 
 	* Simplified database access configuration.
 	
-2005-06-12	Francis Lachapelle <francis@Sophos.ca>
+2005-06-12 Francis Lachapelle <francis@Sophos.ca>
 
 	* Added parser support for MySQL (date handling).
 	* Improved parsing of spam log entries.
@@ -350,57 +373,57 @@
 	* Fixed missing class attribute to HTML search template.
 	* Added MySQL database definition file.
 
-2005-05-31	Francis Lachapelle <francis@Sophos.ca>
+2005-05-31 Francis Lachapelle <francis@Sophos.ca>
 
 	* Added support for MySQL.
 	* Lowered most key fields of database to 64 chars.
 	* Improved AMaViSd-new support (cleanup of old db entries).
 
-2005-05-24	Francis Lachapelle <francis@Sophos.ca>
+2005-05-24 Francis Lachapelle <francis@Sophos.ca>
 
 	* Added support for AMaViSd-new 2.3.x.
 
-2005-02-25	Francis Lachapelle <francis@Sophos.ca>
+2005-02-25 Francis Lachapelle <francis@Sophos.ca>
 
 	* Added support for DISCARD actions in Postfix
 	  maps.
 
-2005-01-11	Francis Lachapelle <francis@Sophos.ca>
+2005-01-11 Francis Lachapelle <francis@Sophos.ca>
 
 	* Added overflow parameter to CSS for rawsource
 	  HTML template.
 
-2005-01-10	Francis Lachapelle <francis@Sophos.ca>
+2005-01-10 Francis Lachapelle <francis@Sophos.ca>
 
 	* Improved error messages in Lookup/ldap.pl.
 	* Fixed an issue with virus identification in
 	  cgi-bin/rawsource.cgi when multiple parts are infected.
 
-2005-01-05	Francis Lachapelle <francis@Sophos.ca>
+2005-01-05 Francis Lachapelle <francis@Sophos.ca>
 
 	* Fixed date bug in parser when the year change.
 
-2004-12-08	Francis Lachapelle <francis@Sophos.ca>
+2004-12-08 Francis Lachapelle <francis@Sophos.ca>
 
 	* Changed default configuration value for
 	  amavisd-new_backend.
 	* Changed some old variables in Web.pm.
 	* Tagged CVS branch to v0.8.2.
 
-2004-12-07	Francis Lachapelle <francis@Sophos.ca>
+2004-12-07 Francis Lachapelle <francis@Sophos.ca>
 
 	* Added support for banned files.
 
-2004-12-06	Francis Lachapelle <francis@Sophos.ca>
+2004-12-06 Francis Lachapelle <francis@Sophos.ca>
 
 	* Added missing files for the preference module.
 
-2004-11-26	Francis Lachapelle <francis@Sophos.ca>
+2004-11-26 Francis Lachapelle <francis@Sophos.ca>
 
 	* Improved CSS.
 	* Tagged CVS branch to v0.8.0.
 
-2004-11-17	Francis Lachapelle <francis@Sophos.ca>
+2004-11-17 Francis Lachapelle <francis@Sophos.ca>
 
 	* Added caching to function getUsersByAddress of module
 	  Lookup/file.pl (speed improvement for parser).
@@ -408,7 +431,7 @@
 	  getUsersByAddress when using the module Lookup/file.pl and
 	  no virtual address nor alias is defined for an address.
 
-2004-11-16	Francis Lachapelle <francis@Sophos.ca>
+2004-11-16 Francis Lachapelle <francis@Sophos.ca>
 
 	* Changed the library files structure.
 	* Removed graph titles from generated images; titles are now
@@ -418,32 +441,32 @@
 	* Added support for querying multiple LDAP servers.
 	* Improved CSS.
 
-2004-11-10	Francis Lachapelle <francis@Sophos.ca>
+2004-11-10 Francis Lachapelle <francis@Sophos.ca>
 
 	* Modified parser to handled log variations of latest
 	  version of AMaVis (2.1.2).
 	* Modified parser to force SQL inserts of addresses
 	  in lower case.
 
-2004-08-10	Francis Lachapelle <francis@Sophos.ca>
+2004-08-10 Francis Lachapelle <francis@Sophos.ca>
 
 	* Modified parsing of the configuration file
 	  variables so that whitespaces are not removed.
 
-2004-07-26	Francis Lachapelle <francis@Sophos.ca>
+2004-07-26 Francis Lachapelle <francis@Sophos.ca>
 
 	* Added parameter 'show_graph_dow' to config file.
 	* Added empty graphs when account has no rejected
 	  message and an information sentence when search
 	  returns no results.
 
-2004-07-22	Francis Lachapelle <francis@Sophos.ca>
+2004-07-22 Francis Lachapelle <francis@Sophos.ca>
 
 	* Added database automatic reconnection for daemon.
 	* Added support for https in redirections.
 	* Added parameter 'allow_virus_reinjection' to config.
 
-2004-07-21	Francis Lachapelle <francis@Sophos.ca>
+2004-07-21 Francis Lachapelle <francis@Sophos.ca>
 
 	* Removed message body display after failure on reinjecting
 	  a message.
@@ -451,12 +474,12 @@
 	* Updated README.
 	* Desactivated template debugging.
 
-2004-07-20	Francis Lachapelle <francis@Sophos.ca>
+2004-07-20 Francis Lachapelle <francis@Sophos.ca>
 
 	* Added parameter 'quarantine_path' to config file.
 	* Added database backend support for web sessions.
 
-2004-07-19	Francis Lachapelle <francis@Sophos.ca>
+2004-07-19 Francis Lachapelle <francis@Sophos.ca>
 
 	* Added handling of INT & TERM signals in daemon.
 	* Always print hostname when daemon is started.
@@ -478,22 +501,22 @@
 	* Moved CSS to a separate file.
 	* Added some icons for quarantine web templates.
 
-2004-05-26	Francis Lachapelle <francis@Sophos.ca>
+2004-05-26 Francis Lachapelle <francis@Sophos.ca>
 
 	* Added support for helo rejections.
 	* The PID file is no longer being created if the parser
 	  is running in debug mode.
 
-2004-04-16	Francis Lachapelle <francis@Sophos.ca>
+2004-04-16 Francis Lachapelle <francis@Sophos.ca>
 
 	* Fixed problem with HUP signal handling.
 
-2004-04-08	Francis Lachapelle <francis@Sophos.ca>
+2004-04-08 Francis Lachapelle <francis@Sophos.ca>
 
 	* The IMAP server name is now configurable.
 	* Updated the README.
 
-2004-04-07	Francis Lachapelle <francis@Sophos.ca>
+2004-04-07 Francis Lachapelle <francis@Sophos.ca>
 
 	* Added lib/spamity/backend/file.pm and 
 	  /lib/spamity/backend/ldap.pm; the virtual alias table can
@@ -502,11 +525,11 @@
 	* spamity::authenticate now correctly closes the connection
 	  if the imap authentication failed.
 
-2004-04-01	Francis Lachapelle <francis@Sophos.ca>
+2004-04-01 Francis Lachapelle <francis@Sophos.ca>
 
 	* Fixed some CSS errors.
 
-2004-03-15	Francis Lachapelle <francis@Sophos.ca>
+2004-03-15 Francis Lachapelle <francis@Sophos.ca>
 
 	* Improved parsing of INFECTED log entries; virus name is
 	  logged.

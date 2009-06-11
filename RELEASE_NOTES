@@ -1,5 +1,5 @@
 ===============================================================================
-Spamity v0.9.6 release notes (2007-10-12)
+Spamity v0.9.6 release notes (2007-07-12)
 ===============================================================================
 
 Overview
@@ -20,15 +20,15 @@ Changes
 - Renamed scripts/multiple_tables.pl to scripts/create_tables.pl.
 
 - Removed references to the 'date' binary in sbin/spamityd in order to improve
-   portability.
+  portability.
 
 - Improved URL and language handling in CGI scripts.
 
 - Added function postNew to lib/Spamity/Database.pm to allow drivers to execute 
-  a statement once the connection to the  database is established.
+  a statement once the connection to the database is established.
 
 - Added functions getOctetLength, formatFromSubquery, and formatLimitWithOffset 
-  to lib/Spamity/Database.pm for more  portability among database drivers.
+  to lib/Spamity/Database.pm for more portability among database drivers.
 
 - Improved scripts/multiple_tables.pl to support the execution of SQL statements
   before and/or after the creation of the tables (required for Oracle).
@@ -165,7 +165,7 @@ Migration to version 0.9.2
 
 - If you experienced performance issues in the past, you may consider splitting
   your quarantine in multiple tables. To do so, use the provided script named
-  "multiple_table.pl". You should also use this script to create your tables
+  "create_tables.pl". You should also use this script to create your tables
   when deploying Spamity for the first time.
 
 - Refer to the default configuration file to migrate your configuration file.
