@@ -1,0 +1,188 @@
+Spamity v0.9.6 (2007-10-12)
+===============================================================================
+
+http://www.collaboration-world.com/spamity
+
+
+Installation
+===============================================================================
+
+1. Creation of the database
+
+1.1 Tables
+
+Spamity requires only one table. It's recommended to create a specific database
+for Spamity and a unique user to access its data.
+
+If you expect the number of blocked messages to be large with respect to the
+power/load of your database server, you can ask Spamity to use multiple tables.
+To do so, set the parameter 'tables_count' to a reasonable number in your
+configuration file. 
+
+Once you have properly modified the configuration file spamity.conf (see 
+sections 2 and 3 of this document), run the script "create_tables.pl". It will 
+create one or many tables in your database. See the first lines of this script 
+for more information.
+
+1.2 Maintenance
+
+You probably don't want to keep your quarantine to grow forever. You should 
+define a daily cronjob to run the script "spamity_maintenance_sql.pl". This 
+script accepts as argument the number of days to keep in the quarantine.
+
+1.3 Web Sessions
+
+If you install the web interface, you can also store web sessions in the
+database. To do so, you must create an additionnal table defined in the file
+sessions.psql (for PostgreSQL) or in the file sessions.mysql (for MySQL).
+If you already use CGI::Session for another web application and want to use
+the same table, make sure to add the column 'sid' (see the mentioned files).
+Notice that the table definition for PostgreSQL varies depending on the version
+of CGI::Session you have installed.
+
+1.4 AMaViSd-new
+
+As of version 0.8.0, Spamity's web interface provides access to AMaViSd-new's
+custom users policies, and white/black lists. However, tables must be defined 
+in the same database as Spamity.
+
+
+2. Configuration and installation of the daemon
+
+2.1 Perl Modules
+
+The following Perl modules must be installed. You can easily install the
+missing modules locally and specify the installation path in the daemon
+script (see comments in sbin/spamityd).
+
+  Compress::Zlib
+  DBI
+  DBD::Pg or DBD::mysql
+
+And these additionnal modules if you want to use the LDAP backend for
+users/addresses lookups:
+
+  Net::LDAP
+
+All modules are available at http://search.cpan.org/. For RedHat distributions,
+most modules are available as RPM packages at http://dag.wieers.com/packages/.
+
+The included module Spamity.pm along with the Spamity directory should also
+be accesssible by the daemon. To know where Perl looks for available modules,
+execute the following command:
+
+% perl -le 'print join("\n",@INC)'
+
+If you installed the modules at a non-standard path, look for the following line 
+at the begining of the daemon script:
+
+# use lib "/opt/spamity/lib";
+
+Modify this line according to your modules directory path and uncomment it.
+
+2.2 Daemon
+
+The daemon must be executed by a user who can read the mail server log files.
+You should make sure the script can only be read and execute by this user. The
+variables defined in spamity.conf must be changed according to your
+installation and the file must be moved under /etc.
+
+The daemon accepts various arguments. Execute it with the argument "--help" for
+more information.
+
+2.3 Log Rotation
+
+If your mail log files are periodically rotated, you must make sure to alert
+the daemon when the rotation occurs. To do so, you should add a line similar
+to the following to your logrotate script :
+
+/bin/kill -HUP `cat /var/run/spamityd.pid 2> /dev/null` 2> /dev/null || true
+
+2.4 Init Script
+
+Some init scripts are available in the directory init.d:
+  init.d/spamityd.lsb: Linux Standard Base version, works well under Debian
+                       (including Ubuntu) and latest version of RHEL.
+  init.d/spamityd.rh: works with distros that uses chkconfig, like all
+                      RedHat variants (including RHEL).
+  init.d/spamityd.unix: simple yet efficient version, should work under
+                        most UN*X variants (tested under Solaris 9).
+
+3. Configuration and installation of the web interface
+
+3.1 Perl Modules
+
+The following Perl modules must be installed.
+
+  CGI::Session
+  Template
+  GD::TextUtil
+  GD::Graph
+  DBI
+
+Depending on your configuration, install these additionnal modules:
+
+  DBD::Pg (when using PostgreSQL)
+  DBD::mysql (when using MySQL)
+  Mail::IMAPClient (when using IMAP backend for authentication)
+  Net::LDAP (when using LDAP backend for authentication and/or lookups)
+  Mail::Internet (when allowing reinjection)
+
+All modules are available at http://search.cpan.org/. For RedHat distributions,
+most modules are available as RPM packages at http://dag.wieers.com/packages/.
+
+You can easily install the missing modules locally and specify the installation
+path in the CGI scripts (login.cgi, stats.cgi, search.cgi, help.cgi, and 
+graph.cgi). Look for the following line at the begining of each CGI script:
+
+# use lib "/opt/spamity/lib";
+
+Modify this line according to your modules directory path and uncomment it.
+
+Alternatively, you can also set PERL5LIB in your Apache configuration. Put this 
+in a Directory block or .htaccess file:
+
+  SetEnvIf  Request_URI  "^/cgi-bin/" PERL5LIB=/opt/spamity/lib
+
+This will add the correct paths to PERL5LIB whenever someone accesses your 
+cgi-bin directory.
+
+Install the module Spamity.pm along with the Spamity directory in a place
+accessible by the CGI scripts or as for the external modules, modify the CGI
+scripts or your Apache configuration.
+
+3.2 CGI scripts and static files
+
+The static files (located under htdocs) must be accessible by your web server.
+The CGI scripts (located under cgi-bin) must be accessible and executable by 
+your web server. Modify the configuration parameters "cgibin_path" and 
+"htdocs_path" with respect to the location of those files.
+
+3.3 Configuration
+
+The variables defined in spamity.conf must be changed according to your
+installation and the file must be moved under /etc.
+
+
+Legal information
+===============================================================================
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+
+Main author:  Francis Lachapelle <francis@Sophos.ca>
+Contributor:  Ludovic Marcotte <ludovic@Sophos.ca>
+
+

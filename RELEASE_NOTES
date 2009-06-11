@@ -1,0 +1,219 @@
+===============================================================================
+Spamity v0.9.6 release notes (2007-10-12)
+===============================================================================
+
+Overview
+-------------------------------------------------------------------------------
+
+This is a maintenance release. It fixes some bugs found in version 0.9.5. It
+also introduces support for Oracle databases and the possibility to define a 
+white and/or black list without specifying a custom policy.
+
+
+Changes
+-------------------------------------------------------------------------------
+
+- Configuration: added ENV_ prefix variables.
+
+- Added support for CGI::Session::Oracle.
+
+- Renamed scripts/multiple_tables.pl to scripts/create_tables.pl.
+
+- Removed references to the 'date' binary in sbin/spamityd in order to improve
+   portability.
+
+- Improved URL and language handling in CGI scripts.
+
+- Added function postNew to lib/Spamity/Database.pm to allow drivers to execute 
+  a statement once the connection to the  database is established.
+
+- Added functions getOctetLength, formatFromSubquery, and formatLimitWithOffset 
+  to lib/Spamity/Database.pm for more  portability among database drivers.
+
+- Improved scripts/multiple_tables.pl to support the execution of SQL statements
+  before and/or after the creation of the tables (required for Oracle).
+
+
+===============================================================================
+Spamity v0.9.5 release notes (2007-03-09)
+===============================================================================
+
+Overview
+-------------------------------------------------------------------------------
+
+This is a maintenance release. It fixes some bugs found in version 0.9.4. It
+also introduces the possibility to force dropping the database connection after
+having executed a prepared statement a maximum number of times. 
+
+Changes
+-------------------------------------------------------------------------------
+
+- Configuration: added max_statements_reuse. This paramater is used to solved a
+  bug with DBD::Pg v1.43.
+
+- Modified spamityd so prepared statements are initialized when reconnecting to
+  the database.
+
+- Modified spamityd to guess the log year to avoid dates in future when the
+  year changes.
+
+
+===============================================================================
+Spamity v0.9.4 release notes (2007-01-03)
+===============================================================================
+
+Overview
+-------------------------------------------------------------------------------
+
+This is a maintenance release. It fixes some bugs found in version 0.9.3.
+
+Changes
+-------------------------------------------------------------------------------
+
+- Modified spamityd to not log greylisting (tested with the default
+  configuration of Postgrey).
+
+- Added debugging output for spamity_maintenance_sql.pl.
+
+- Added a plugin for Munin (see http://munin.projects.linpro.no/).
+
+- Fixed a bug related to the redirection path in cgi-bin/login.cgi.
+
+
+===============================================================================
+Spamity v0.9.3 release notes (2006-10-03)
+===============================================================================
+
+Overview
+-------------------------------------------------------------------------------
+
+This is a maintenance release. It fixes some bugs found in version 0.9.2.
+
+Changes
+-------------------------------------------------------------------------------
+
+- Fixed Javascript bug so popup window of rawsource can be properly open with 
+  Internet Explorer
+
+- Added debugging for quarantined mail reinjection with respect to log_level
+
+- When receiving a HUP signal, spamityd re-opens its logfile (required if the
+  logfile is rotated)
+
+- Added call to reconnect when execute statement failed in spamityd
+
+- Fixed regexp in spamityd for messages rejected by a RBL
+
+- Fixed various syntax errors.
+
+
+===============================================================================
+Spamity v0.9.2 release notes (2006-08-03)
+===============================================================================
+
+Overview
+-------------------------------------------------------------------------------
+
+This version of Spamity can be considered as a pre-release of version 1.0.
+Major changes included:
+
+- improved database error handling;
+
+- improved logging;
+
+- improved lookups;
+
+- possibility to split the quarantine in multiple table for improved
+  performance;
+
+- improved formatting of headers when viewing a message;
+
+- improved web sessions management;
+
+- improved documentation (Pod format).
+
+Migration to version 0.9.2
+-------------------------------------------------------------------------------
+
+- The spamity table has one new column named 'host' used to identify the host 
+  from which the daemon of Spamity logged the entry. You can add it to your 
+  table using the following SQL statement:
+
+    ALTER TABLE spamity ADD COLUMN host varchar(64);
+
+  See files table.psql or table.mysql.
+
+- The index 'spamity_index' is no longer used and can be safely dropped.
+
+- The content of columns 'filter_type', 'filter_id' and 'description' are
+  improved:
+    rejected by spamassassin: score appears in filter_id;
+    rejected by header/body: description and filter_id are permuted;
+    rejected by rhsbl server: filtered by rbl
+
+  Since filter_id has changed for some rules, spamityd inserts new rows for
+  entries already parsed and inserted with the previous filter_id. To avoid this
+  problem, either empty the spamity table before parsing your log files or 
+  simply don't parse older log files.
+
+- If you use a database table to store your web sessions, a new column named
+  'sid' has to be added:
+
+    ALTER TABLE sessions ADD COLUMN sid varchar(64);
+
+  See files sessions.psql or sessions.mysql.
+
+- If you experienced performance issues in the past, you may consider splitting
+  your quarantine in multiple tables. To do so, use the provided script named
+  "multiple_table.pl". You should also use this script to create your tables
+  when deploying Spamity for the first time.
+
+- Refer to the default configuration file to migrate your configuration file.
+  Among the changes, make sure to verify the following new/changed parameters:
+    spamity_database
+    lookup_username_maps
+    lookup_local_username_maps
+    lookup_address_maps
+    domain_maps
+    session_database
+    amavisd-new_database
+
+Changes
+-------------------------------------------------------------------------------
+
+- CGI scripts log to log_file
+
+- Configuration: renamed database_handler to spamity_database
+
+- Configuration: renamed session_handler to session_database
+
+- Configuration: renamed amavisd-new_backend to amavisd-new_database
+
+- Configuration: added log_level
+
+- Configuration: added start_page and admin_start_page
+
+- Configuration: added lookup_username_maps, lookup_local_username_maps,
+  lookup_address_maps, and domains_maps (multiple sources)
+
+- Configuration: added session_database (alternative to session_path)
+
+- Configuration: added authentication_backend (no more imap_server)
+
+- Improved parsing of configuration parameters
+
+- Removed references to SecuritySage in spamityd
+
+- Renamed .pl modules extensions to .pm
+
+- Added support for multiple quarantine tables
+
+- Dropped index on main table
+
+- Improved web session (mainly for PostgreSQL, less usefull for MySQL)
+
+- Redesigned Database.pm as an object
+
+- Added script for maintenance
+
+- Added script for table(s) statistics

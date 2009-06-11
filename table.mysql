@@ -1,0 +1,19 @@
+-- spamity
+
+create table spamity (
+  id int unsigned not null auto_increment,
+  logdate timestamp,
+  username varchar(64),
+  host varchar(64),
+  to_user varchar(64),
+  to_host varchar(64),
+  from_user varchar(64),
+  from_host varchar(64),
+  filter_type varchar(64),
+  filter_id varchar(128),
+  description text,
+  rawsource blob,
+  primary key (id),
+  index (logdate),
+  index (username)
+);

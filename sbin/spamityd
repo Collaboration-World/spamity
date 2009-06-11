@@ -1,0 +1,656 @@
+#!/usr/bin/perl
+#
+#  $Source: /opt/cvsroot/projects/Spamity/sbin/spamityd,v $
+#  $Name:  $
+#
+#  Copyright (c) 2003, 2004, 2005, 2006, 2007
+#
+#  Author: Francis Lachapelle <francis@Sophos.ca>
+#
+#  This program is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 2 of the License, or
+#  your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details
+#
+
+# Uncomment and modify the following line if you installed Spamity's Perl modules
+# and/or dependent modules in some non-standard directory.
+#
+# use lib '/opt/spamity/lib';
+use lib '/home/francis/Source/Spamity.tmp/lib';
+
+#*********************************************************************
+# Load initial Perl modules
+#*********************************************************************
+
+&loadModules(qw(Spamity POSIX Sys::Hostname Date::Manip));
+
+#*********************************************************************
+# Command-line variables
+#*********************************************************************
+
+my $date = '\w{3}\s+\d+';
+my $forced_date = 0;
+my $year;
+my $rotated = 0;
+my $tailed = 0;
+my $debug = 0;
+my $hostname = Sys::Hostname->hostname; $hostname =~ s/^(.+?)\..*$/$1/;
+
+#*********************************************************************
+# SQL queries
+#*********************************************************************
+
+my $SELECT_ST = <<'SELECT';
+select id from %s
+ where logdate = ? and username = ? and to_user = ? and to_host = ? and 
+       from_user = ? and from_host = ? and filter_type = ? and filter_id = ?
+SELECT
+
+my $INSERT_ST = <<'INSERT';
+insert into %s
+    (logdate, username, host, to_user, to_host, from_user, from_host, filter_type, filter_id, description, rawsource)
+values
+    (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+INSERT
+
+#*********************************************************************
+# Runtime variables
+#*********************************************************************
+
+my @PATHS = ();
+my $path;
+my $db;
+my %select_sth;
+my %insert_sth;
+my %count_sth;
+
+#*********************************************************************
+# Verify command-line arguments
+#*********************************************************************
+
+if ($#ARGV < 0) {
+    # No argument specified; tail default log file
+    $tailed = 1;
+}
+else {
+    my $i = 0;
+    my $arg;
+    while (defined ($arg = $ARGV[$i++])) {
+	
+	if ($arg =~ m/^-d$/) {
+	    if (defined ($arg = $ARGV[$i]) && not $arg =~ m/^-/) {
+		
+		if ($arg =~ m/(\d{4})([\-\/])\d{2}([\-\/]\d{2})?/) {
+		    $forced_date = 1;
+		    $year = $1;
+		    if (defined $3 && length($3) > 0) {
+			$date = &Date::Manip::UnixDate($arg, "%b %e");
+		    }
+		    else {
+			$arg .= $2 . "01";
+			$date = &Date::Manip::UnixDate($arg, "%b");
+			$date .= '\s+\d+';
+		    }
+		    $i++;
+		}
+	    }
+	    print "Date: $date\n" if (defined $date);
+	}
+	elsif ($arg =~ m/^-t$/) {
+	    print "Tail\n";
+	    $tailed = 1;
+	}
+	elsif ($arg =~ m/^-r$/) {
+	    print "Rotated logs\n";
+	    $rotated = 1;
+	}
+	elsif ($arg =~ m/^-f$/) {
+	    while (defined ($arg = $ARGV[$i]) && not $arg =~ m/^-/) {
+		push (@PATHS, $arg);
+		$i++;
+	    }
+	}
+	elsif ($arg =~ m/^--host$/) {
+	    if (defined ($arg = $ARGV[$i]) && not $arg =~ m/^-/) {
+		$hostname = $arg;
+		$i++;
+	    }
+	}
+	elsif ($arg =~ m/^--debug$/) {
+	    print "Debug\n";
+	    $debug = 1;
+	}
+	elsif ($arg =~ m/^--?h(elp)?$/) {
+	    print "Usage\n";
+	    print "  --help, -h        show this help\n";
+	    print "  -d <date>         specify date (YYYY-MM-DD)\n";
+	    print "  -f <log>          specify log file to parse\n";
+	    print "  -r                also parse rotated logs\n";
+	    print "  -t                tail log file\n";
+	    print "  --host <hostname> specify hostname\n";
+	    print "  --debug           don't insert in database, print only\n";
+	    print "\n";
+	    print "With no argument, the script tails ".&Spamity::conf('maillog_path')." for no specific date for host $hostname.\n";
+	    exit;
+	}
+    }
+}
+
+# Use default path if no log file is specified
+push (@PATHS, &Spamity::conf('maillog_path')) if ($#PATHS < 0);
+
+# Added rotated log files if asked
+if ($rotated) {
+    foreach $path (@PATHS) {
+	my $i = 1;
+	while (-e "$path.$i") {
+	    if (not "@PATHS" =~ m/$path\.$i/) {
+		push (@PATHS, "$path.$i");
+	    }
+	    $i++;
+	}
+    }
+}
+
+#*********************************************************************
+# Verify some of the configuration file parameters
+#*********************************************************************
+unless (-d &Spamity::conf('quarantine_path') && -r &Spamity::conf('quarantine_path')) {
+    die "The directory ",&Spamity::conf('quarantine_path')," doesn't exist or is not readable. Verify the parameter 'quarantine_path' in your configuration file.\n";
+}
+
+print "Files: @PATHS\n";
+
+print "Hostname: $hostname\n";
+
+#*********************************************************************
+# Verify existence of PID file
+#*********************************************************************
+
+if (! $debug) {
+    if ($tailed) {
+
+	if (-t STDIN && -t STDOUT && -f &Spamity::conf('pidfile')) {
+	    open (PIDFILE, &Spamity::conf('pidfile'));
+	    
+	    die "Spamity daemon is probably running (process id ",<PIDFILE>,"). Remove pid file first (",&Spamity::conf('pidfile'),").\n";
+	}
+
+#*********************************************************************
+# Daemonize the program
+#*********************************************************************
+
+	chdir ('/') or die "Can't chdir to /: $!";
+	open (STDIN, '/dev/null') or die "Can't read /dev/null: $!";
+	if (&Spamity::conf('logfile', 1)) {
+	    open (STDOUT, ">>".&Spamity::conf('logfile')) or die "Can't write to ".&Spamity::conf('logfile').": $!";
+	    open (STDERR, ">>".&Spamity::conf('logfile')) or die "Can't write to ".&Spamity::conf('logfile').": $!";
+	}
+	else {
+	    open (STDOUT, '>>/dev/null') or die "Can't write to /dev/null: $!";
+	    open (STDERR, '>>/dev/null') or die "Can't write to /dev/null: $!";
+	}
+	defined(my $pid = fork) or die &Spamity::logPrefix,"Can't fork: $!";
+	exit if $pid;
+	setsid or die &Spamity::logPrefix,"Can't start a new session: $!";
+	umask 0;
+	
+#*********************************************************************
+# Dump the PID!
+#*********************************************************************
+	
+	open (PIDFILE, ">".&Spamity::conf('pidfile')) or die &Spamity::logPrefix,"Can't open pid file: $!";
+	print PIDFILE "$$";
+	close(PIDFILE);
+	
+#*********************************************************************
+# Delete the PID when daemon exits
+#*********************************************************************
+	
+	$SIG{TERM} = $SIG{INT} = sub {
+	    warn &Spamity::logPrefix,"spamityd terminated\n";
+	    if ($db && $db->dbh) {
+		$db->dbh->disconnect;
+	    }
+	    unlink(&Spamity::conf('pidfile')) or die &Spamity::logPrefix,"Can't unlink pid file: $!";
+	    exit;
+	};
+    }
+}
+
+#*********************************************************************
+# Load additional Perl modules
+#*********************************************************************
+
+&loadModules(qw(Spamity::Database Spamity::Lookup IO::Handle Compress::Zlib));
+
+#*********************************************************************
+# Establish database connection
+#*********************************************************************
+
+if (! $debug) {
+    $db = Spamity::Database->new(database => 'spamity',
+				 autoconnect => &Spamity::conf('db_reconnect_interval'));
+    warn &Spamity::logPrefix,"spamityd ready\n";
+}
+
+#*********************************************************************
+# Build domains lookup table
+#*********************************************************************
+
+my %domains;
+my $domain;
+my $domains_ref = &Spamity::Lookup::getDomains();
+foreach $domain (@$domains_ref) { $domains{$domain} = 1 }
+
+#*********************************************************************
+# Open and tail log file
+#*********************************************************************
+
+my $spam_date;
+my @usernames;
+my @from_usernames;
+my $username;
+my $userkey;
+my $key;
+my $to_user;
+my $to_host;
+my @to;
+my $from_user;
+my $from_host;
+my $filter_type;
+my $filter_id;
+my $description;
+my $rawsource;
+my $gzsource;
+
+foreach $path (@PATHS) {
+    open (LOGFILE, $path) or die &Spamity::logPrefix,"Can't open $path: $!";
+
+#*********************************************************************
+# Get prepared for a HUP!
+#*********************************************************************
+
+    $SIG{HUP} = sub {
+	if (&Spamity::conf('logfile', 1)) {
+	    close (STDOUT);
+	    close (STDERR);
+	    open (STDOUT, ">>".&Spamity::conf('logfile')) or die "Can't write to ".&Spamity::conf('logfile').": $!";
+	    open (STDERR, ">>".&Spamity::conf('logfile')) or die "Can't write to ".&Spamity::conf('logfile').": $!";
+	}
+	warn &Spamity::logPrefix,"Received HUP signal\n";
+	close(LOGFILE);
+	if (defined $path) {
+	    open(LOGFILE, $path) or die &Spamity::logPrefix,"Can't open $path: $!";
+	}
+    };
+
+    for (;;) {
+    
+	while (<LOGFILE>) {
+
+	    # Ignore non-fatal SMTP errors (Greylisting)
+	    next if /postfix\/smtpd.*: NOQUEUE: reject: RCPT from [^:]+: 4\d{2} /;
+	    
+	    next unless (m/reject:/ || m/discard:/ || m/Not-Delivered/ || m/Blocked SPAM/ || m/Blocked BANNED/ || m/INFECTED/);
+	    	    
+	    $year = &POSIX::strftime("%Y", localtime) unless ($forced_date);
+	    $spam_date = undef;
+	    $rawsource = undef;
+	    $gzsource = undef;
+	    @to = ();
+	    @from_usernames = ();
+	    
+#*********************************************************************
+# Filter type : header (Subject, Content-Type, Date), body (via postfix check)
+# Filter id   : (returned text by the server)
+#*********************************************************************
+	    if (m/^($date) (.*)$hostname postfix\/cleanup.*(?:reject|discard): (header\s[-\w]*|body):? (.*); from=<(?:(.*?)@)?(.*?)> to=((?:<(?:.*?@)?.*?>,?)+).*: (.*)$/) {
+		($spam_date, $from_user, $from_host, $filter_type, $filter_id, $description) =
+		    (&buildDate($year,$1,$2), $5, $6, lc($3), $8, $4);
+		@to = &parseAddresses($7);
+	    }
+#*********************************************************************
+# Filter type : rhsbl client (via postfix reject_rhsbl_sender)
+# Filter id   : (service used to block the message)
+#*********************************************************************
+	    elsif (m/^($date) (.*)$hostname.*reject: RCPT from .* Sender address \[\S+\] blocked using (\S+?); (.*?); from=<(?:(.*?)@)?(.*?)> to=((?:<(?:.*?@)?.*?>,?)+)/) {
+		($spam_date, $from_user, $from_host, $filter_type, $filter_id, $description) =
+		    (&buildDate($year,$1,$2), $5, $6, 'rhsbl client', $3, $4);
+		@to = &parseAddresses($7);
+	    }
+#*********************************************************************
+# Filter type : access username (via postfix check_sender_access)
+# Filter id   : (rejected username)
+#*********************************************************************
+            elsif (m/^($date) (.*)$hostname.*(?:reject|discard): RCPT .*<(.*?)>: Sender address rejected: (.+?); from=<(?:(.*?)@)?(.*?)> to=((?:<(?:.*?@)?.*?>,?)+)/) {
+		($spam_date, $from_user, $from_host, $filter_type, $filter_id, $description) =
+                    (&buildDate($year,$1,$2), $5, $6, 'access username', $3, $4);
+		@to = &parseAddresses($7);
+            }
+#*********************************************************************
+# Filter type : rbl (via postfix reject_rbl_client, reject_rhsbl_client)
+# Filter id   : (service used to block the message)
+#*********************************************************************
+            elsif (m/^($date) (.*)$hostname.*(?:reject|discard): RCPT from .*? (Client host \[\S+\] blocked .*?); from=<(?:(.*?)@)?(.*?)> to=((?:<(?:.*?@)?.*?>,?)+)/) {
+		($spam_date, $from_user, $from_host, $filter_type, $filter_id, $description) =
+		    (&buildDate($year,$1,$2), $4, $5, 'rbl', 'rbl', $3);
+		@to = &parseAddresses($6);
+		if ($description =~ m/blocked using (.*?)(\;.+)?$/) {
+		    $filter_id = $1;
+		}
+	    }
+#*********************************************************************
+# Filter type : spam (via amavisd-new)
+# Filter id   : SpamAssassin
+#*********************************************************************
+	    elsif (m/^($date) (.*)$hostname amavis.* (?:Blocked SPAM)?(?:Not-Delivered)?, .*<(?:(.*?)@)?(.*?)> -> ((?:<(?:.*?@)?.*?>,?)+).*? ((?:quarantine:? (spam-.*?)(?:\.gz)?, )?(?:Resent-)?(?:Message-ID|mail_id): .*, Hits: (.*?)(?:, .*)?)$/) {
+		($spam_date, $from_user, $from_host, $filter_type, $filter_id, $description, $rawsource) =
+		    (&buildDate($year,$1,$2), $3, $4, 'spam', "SpamAssassin (Score: $8)", $6, $7);
+		@to = &parseAddresses($5);
+	    }
+#*********************************************************************
+# Filter type : virus (via amavisd-new)
+# Filter id   : (alphanumeric characters separated by dashes)
+#*********************************************************************
+	    elsif (m/^($date) (.*)$hostname amavis.* INFECTED \((.+?)\), .*<(?:(.*?)@)?(.*?)> -> ((?:<(?:.*?@)?.*?>,?)+).* (quarantine:? (virus-.*?)(?:\.gz)?, (?:Resent-)?(?:Message-ID|mail_id): .*, Hits: .*)$/) {
+		($spam_date, $from_user, $from_host, $filter_type, $filter_id, $description, $rawsource) =
+		    (&buildDate($year,$1,$2), $4, $5, 'virus', $3, $7, $8);
+		@to = &parseAddresses($6);
+	    }
+#*********************************************************************
+# Filter type : banned (via amavisd-new)
+# Filter id   : banned file
+#*********************************************************************
+	    elsif (m/^($date) (.*)$hostname amavis.* Blocked BANNED \((.+?)\), .*<(?:(.*?)@)?(.*?)> -> ((?:<(?:.*?@)?.*?>,?)+) quarantine:? (banned-.*?)(?:\.gz)?, Message-ID: .*, Hits: .*$/) {
+		($spam_date, $from_user, $from_host, $filter_type, $filter_id, $description, $rawsource) =
+		    (&buildDate($year,$1,$2), $4, $5, 'banned', 'banned file', $3, $7);
+		@to = &parseAddresses($6);
+	    }
+#*********************************************************************
+# Filter type : helo (via postfix reject_invalid_hostname,
+#               reject_non_fqdn_hostname, reject_unknown_hostname)
+# Filter id   : (the rejection message from the smtp server)
+#*********************************************************************
+	    elsif (m/^($date) (.*)$hostname.* (?:reject|discard): .* Helo command rejected: (.+?); from=<(?:(.*?)@)?(.*?)> to=((?:<(?:.*?@)?.*?>,?)+)/) {
+		($spam_date, $from_user, $from_host, $filter_type, $filter_id, $description) =
+		    (&buildDate($year,$1,$2), $4, $5, 'helo', 'helo', $3);
+		@to = &parseAddresses($6);
+	    }
+#*********************************************************************
+# Unknown rejected entry; inform the developer!
+#*********************************************************************
+	    elsif (m/^($date) (.*)$hostname.* (reject:|discard:|SPAM|Not-Delivered|INFECTED)/) {
+		if (! m/(User unknown|Relay access denied|VIRUS|BANNED)/) {
+		    chomp;
+		    if ($debug) {
+			print &Spamity::logPrefix,"???: $_\n";
+		    } elsif (&Spamity::conf('log_level') > 1) {
+			warn "[DEBUG] Unknown rejected entry: $_\n";
+		    }
+		}
+	    }
+#*********************************************************************
+# Execute the sql statement or print details if in debug mode
+#*********************************************************************
+	    $spam_date = &Date::Manip::ParseDate($spam_date);
+	    if (defined $spam_date) {
+		$spam_date = &Date::Manip::UnixDate($spam_date, "%Y-%m-%d %H:%M:%S");
+		if ($from_user && $from_host && $domains{lc($from_host)}) {
+		    push(@from_usernames, &Spamity::Lookup::getUsersByAddress("$from_user\@$from_host"));
+		}
+		if (defined $rawsource) {
+		    undef $/;
+		    if (-f &Spamity::conf('quarantine_path')."/$rawsource") {
+			open(SOURCE, &Spamity::conf('quarantine_path')."/$rawsource");
+			binmode(SOURCE);
+			$rawsource = <SOURCE>;
+			close(SOURCE);
+		    }
+		    elsif (-f &Spamity::conf('quarantine_path')."/$rawsource.gz") {
+			undef $/;
+			open(GZSOURCE, &Spamity::conf('quarantine_path')."/$rawsource.gz");
+			binmode(GZSOURCE);
+			$gzsource = <GZSOURCE>;
+			$rawsource = &Compress::Zlib::memGunzip($gzsource);
+			close(GZSOURCE);
+		    }
+		    else {
+			$rawsource = undef;
+		    }
+		    $/ = "\n";
+		}
+		foreach (@to) {
+		    @usernames = ();
+
+		    if (m/(?:(.*?)@)?(.*?)$/) {
+			($to_user, $to_host) = ($1, $2);
+			push(@usernames, &Spamity::Lookup::getUsersByAddress("$to_user\@$to_host")) if ($domains{lc($to_host)});
+		    }
+		    push(@usernames, @from_usernames);
+
+		    if ($#usernames < 0) { push(@usernames, &Spamity::conf('unknown_recipient')); }
+		    if ($debug) {
+			print &Spamity::logPrefix,"$spam_date $filter_type ($filter_id), from $from_user\@$from_host to $to_user\@$to_host (", join(", ", @usernames), ")\n";
+		    }
+		    else {
+			foreach $username (@usernames) {
+			    $userkey = &Spamity::userKey($username);
+			    $key = $userkey || 'default';
+			    do {
+				if (&Spamity::conf('max_statements_reuse', 1) && $count_sth{$key} &&
+				    ($count_sth{$key} % &Spamity::conf('max_statements_reuse')) == 0) {
+				    # The maximum number of prepared statements executions is reached.
+				    # Flush the prepared statements and disconnect/reconnect to the database.
+				    &reconnect();
+				    next;
+				}
+				&prepareStatement($userkey, $key);
+				if ($count_sth{$key}) {
+				    $count_sth{$key}++;
+				}
+				else {
+				    $count_sth{$key} = 1;
+				}
+
+				unless ($select_sth{$key}->bind_param(1, $spam_date) &&
+					$select_sth{$key}->bind_param(2, $username) &&
+					$select_sth{$key}->bind_param(3, lc(substr($to_user,0,64)) || '_') &&
+					$select_sth{$key}->bind_param(4, lc(substr($to_host,0,64)) || '_') &&
+					$select_sth{$key}->bind_param(5, lc(substr($from_user,0,64)) || '_') &&
+					$select_sth{$key}->bind_param(6, lc(substr($from_host,0,64)) || '_') &&
+					$select_sth{$key}->bind_param(7, $filter_type) &&
+					$select_sth{$key}->bind_param(8, substr($filter_id,0,64))) {
+				    warn &Spamity::logPrefix,"Select statement binding error: ",$DBI::errstr,"\n";
+				    &reconnect();
+				    next;
+				}
+				
+				if ($select_sth{$key}->execute()) {
+				    if ($select_sth{$key}->fetchrow_arrayref) {
+					warn "[DEBUG SQL] $spam_date Entry exist; don't insert data ($key)\n" if (int(&Spamity::conf('log_level')) > 0);
+					$select_sth{$key}->finish;
+					last;
+				    }
+				}
+				else {
+				    warn &Spamity::logPrefix,"Select statement execution error: ",$select_sth{$key}->errstr,"\n";
+				    &reconnect();
+				    next;
+				}
+				
+				unless ($insert_sth{$key}->bind_param(1, $spam_date) &&
+					$insert_sth{$key}->bind_param(2, $username) &&
+					$insert_sth{$key}->bind_param(3, $hostname) &&
+					$insert_sth{$key}->bind_param(4, lc(substr($to_user,0,64)) || '_') &&
+					$insert_sth{$key}->bind_param(5, lc(substr($to_host,0,64)) || '_') &&
+					$insert_sth{$key}->bind_param(6, lc(substr($from_user,0,64)) || '_') &&
+					$insert_sth{$key}->bind_param(7, lc(substr($from_host,0,64)) || '_') &&
+					$insert_sth{$key}->bind_param(8, $filter_type) &&
+					$insert_sth{$key}->bind_param(9, substr($filter_id,0,64)) &&
+					$insert_sth{$key}->bind_param(10, $description) &&
+					$insert_sth{$key}->bind_param(11, $rawsource, $db->BLOB_ATTR)) {
+				    warn &Spamity::logPrefix, "Select statement binding error: ",$DBI::errstr;
+				    &reconnect();
+				    next;
+				}
+
+				if ($insert_sth{$key}->execute()) {
+				    warn "[DEBUG SQL] insert in table ".sprintf('%7s', $key)." ($spam_date, $username)\n" if (int(&Spamity::conf('log_level')) > 0);
+				    last;
+				}
+				if ($insert_sth{$key}->err == $db->DUPLICATE_KEY_ERROR) {
+				    # Duplicated key; not suppose to happen!
+				    # Also happen when a column is missing (host)!
+				    warn &Spamity::logPrefix,"$spam_date Duplicated key; not suppose to happen! ($key)\n";
+				    last;
+				}
+				warn &Spamity::logPrefix,"Insert statement execution error: ",$DBI::errstr,"\n";
+				
+			    } while (&reconnect());
+			}
+		    }
+		}
+	    }
+	}
+	
+	if ($tailed) {
+	    # EOF reached; nap time!
+	    sleep &Spamity::conf('sleep');
+	    LOGFILE->clearerr;
+	}
+	else {
+	    # Read next log file
+	    close LOGFILE;
+	    last;
+	}
+    }
+}
+
+close LOGFILE;
+
+if (! $debug) {
+    if ($db && $db->dbh) {
+	warn "[DEBUG SQL] Disconnecting\n" if (int(&Spamity::conf('log_level')) > 0);
+	$db->dbh->disconnect;
+    }
+}
+exit;
+
+
+sub loadModules
+{
+    my @modules;
+    my @missing;
+
+    @modules = @_;
+
+    for my $m (@modules) {
+	local($_) = $m;
+	$_ .= '.pm';
+	s[::][/]g;
+	if (eval { require $_ } ) {
+	    warn "[DEBUG] Loaded module $m version ", eval('$'.$m.'::VERSION'),"\n" if (int(&Spamity::conf('log_level')) > 0);
+	}
+	else {
+	    push(@missing, "$m ($@)");
+	}
+    }
+    die "Error loading required Perl modules:\n",join('', map{ "  $_\n" } @missing),"\n" if (@missing);
+} # loadModules
+
+
+sub buildDate
+{
+    my $year;
+    my $date;
+    my $time;
+    my $now;
+
+    ($year, $date, $time) = @_;
+
+    unless ($forced_date) {
+	# Don't adjust the year if the date was passed from the command-line to the script.
+	
+	# Since the timestamp from the log file don't include the year,
+	# adjust the year until the timestamp is before the current time.
+	
+	my $nowdate = time;
+	my $logdate = &Date::Manip::UnixDate("$date $year $time", "%s");
+	
+	while ($logdate > $nowdate) {
+	    $year = int($year) - 1;
+	    $logdate = &Date::Manip::UnixDate("$date $year $time", "%s");
+	}
+    }
+    
+    return "$date $year $time";
+} # buildDate
+
+sub parseAddresses
+{
+    my $str;
+    my %addresses;
+
+    ($str) = @_;
+
+    while ($str =~ m/<(.*?)>,?/g) {
+	$addresses{$1} = 1;
+    }
+
+    return (keys %addresses);
+} # parseAddresses
+
+
+sub prepareStatement
+{
+    my $userkey;
+    my $key;
+    my $tablename = 'spamity';
+
+    ($userkey, $key) = @_;
+    if (defined($userkey)) {
+	$tablename .= '_'.$userkey;
+    }
+    
+    unless (defined($select_sth{$key})) {
+	warn "[DEBUG SQL] Preparing select statement for $tablename\n" if (int(&Spamity::conf('log_level')) > 0);
+	$select_sth{$key} = $db->dbh->prepare(sprintf($SELECT_ST, $tablename));
+    }
+
+    unless (defined($insert_sth{$key})) {
+	warn "[DEBUG SQL] Preparing insert statement for $tablename\n" if (int(&Spamity::conf('log_level')) > 0);
+	$insert_sth{$key} = $db->dbh->prepare(sprintf($INSERT_ST, $tablename));
+    }
+} # prepareStatement
+
+
+sub reconnect
+{
+    warn &Spamity::logPrefix,"Reconnecting to the database\n";
+    if ($db && $db->dbh) {
+	$db->dbh->disconnect;
+    }
+    $db = Spamity::Database->new(database => 'spamity',
+				 autoconnect => &Spamity::conf('db_reconnect_interval'));
+    
+    # Destroy prepapred statements
+    foreach (keys %select_sth) {
+	$select_sth{$_} = undef;
+    }
+    foreach (keys %insert_sth) {
+	$insert_sth{$_} = undef;
+    }
+
+    # Reset all counters
+    foreach (keys %count_sth) {
+	$count_sth{$_} = undef;
+    }
+    
+} # reconnect

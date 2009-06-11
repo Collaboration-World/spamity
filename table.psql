@@ -1,0 +1,20 @@
+-- spamity
+
+create table spamity (
+  id serial,
+  logdate timestamp,
+  username varchar(64),
+  host varchar(64),
+  to_user varchar(64),
+  to_host varchar(64),
+  from_user varchar(64),
+  from_host varchar(64),
+  filter_type varchar(64),
+  filter_id varchar(128),
+  description text,
+  rawsource bytea,
+  primary key (id)
+);
+
+create index spamity_logdate_index on spamity (logdate);
+create index spamity_username_index on spamity (username);

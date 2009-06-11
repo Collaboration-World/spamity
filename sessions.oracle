@@ -1,0 +1,7 @@
+-- sessions
+
+create table sessions (
+  id char(32) not null primary key,
+  sid varchar(64),               -- required by Spamity
+  a_session long not null
+);
