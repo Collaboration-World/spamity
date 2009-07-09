@@ -3,7 +3,7 @@
 #  $Source: /opt/cvsroot/projects/Spamity/sbin/spamityd,v $
 #  $Name:  $
 #
-#  Copyright (c) 2003, 2004, 2005, 2006, 2007
+#  Copyright (c) 2003-2009
 #
 #  Author: Francis Lachapelle <francis@Sophos.ca>
 #
@@ -296,7 +296,7 @@ foreach $path (@PATHS) {
 	while (<LOGFILE>) {
 
 	    # Ignore non-fatal SMTP errors (Greylisting)
-	    next if /postfix\/smtpd.*: NOQUEUE: reject: RCPT from [^:]+: 4\d{2} /;
+	    next if /postfix\/smtpd.*: reject: RCPT from [^:]+: 4\d{2} /;
 	    
 	    next unless (m/reject:/ || m/discard:/ || m/Not-Delivered/ || m/Blocked SPAM/ || m/Blocked BANNED/ || m/INFECTED/);
 	    	    
