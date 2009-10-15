@@ -48,6 +48,9 @@ $tt = &Spamity::Web::getTemplate();
 if ($query->param('id')) {
     $vars->{message_id} = $query->param('id');
 }
+elsif ($query->url(-absolute=>1,-path=>1) =~ m/\.cgi\/+([\d:]+)\/?/) {
+    $vars->{message_id} = lc($1);  
+}
 
 $vars->{cgibin_path} = &conf('cgibin_path');
 $vars->{htdocs_path} = &conf('htdocs_path', 1);
