@@ -1,0 +1,193 @@
+[% PROCESS header.html %]
+
+<body>
+
+  <div id="container">
+    <div id="info">
+      <form method="get" action="[% cgibin_path %]/login.cgi/logout"><p>[% username %][% IF admin %] (administration)[% END %]
+      <input class="button" type="submit" value="[% i18n('Logout') %]" /></p></form>
+    </div>
+    <div id="menu">
+      <ul id="primary">
+        <li><a href="[% cgibin_path %]/stats.cgi">[% i18n('statistics') %]</a></li>
+	<li><span>[% i18n('search') %]</span></li>
+	[% IF prefs %]<li><a href="[% cgibin_path %]/prefs.cgi">[% i18n('preferences') %]</a></li>[% END %]
+	<li><a href="[% cgibin_path %]/help.cgi">[% i18n('help') %]</a></li>
+      </ul>
+    </div> <!-- #menu -->
+    <div id="main">
+      <div id="contents">
+        [% IF message %]<p>[% message %]</p>[% END %]
+        [% IF msgs AND (msgs.DAYS.size == 0 OR users.size == 0) %]<p class="error">[% i18n('Your search returned no results. Please refined your query.') %]</p>[% END %]
+        <div id="form">
+          <form method="post" action="[% cgibin_path %]/search.cgi">
+          <input type="hidden" name="page" value="1"/>
+    [% IF admin %]<div><label>[% i18n('domain') %]</label>
+    <select name="domain">
+      <option value="all">[% i18n('All') %]</option>
+      [% FOREACH localdomain = domains %]<option value="[% localdomain %]"[% IF localdomain == domain %] selected="selected"[% END %]>[% localdomain %]</option>[% END %]
+    </select>
+    </div>
+    <div><label>[% i18n('username') %]</label>
+      <input type="text" size="20" name="un" value="[% un %]" />
+    </div>[% END %]
+    <div><label>[% i18n('from') %]</label>
+    <select name="from_year">
+      [% FOREACH year = years %]
+      <option value="[% year %]"[% IF from_year == year %] selected="selected"[% END %]>[% year %]</option>
+      [% END %]
+    </select>
+    <select name="from_month">
+      <option value="01"[% IF from_month == '01' %] selected="selected"[% END %]>[% i18n('January') %]</option>
+      <option value="02"[% IF from_month == '02' %] selected="selected"[% END %]>[% i18n('February') %]</option>
+      <option value="03"[% IF from_month == '03' %] selected="selected"[% END %]>[% i18n('March') %]</option>
+      <option value="04"[% IF from_month == '04' %] selected="selected"[% END %]>[% i18n('April') %]</option>
+      <option value="05"[% IF from_month == '05' %] selected="selected"[% END %]>[% i18n('May') %]</option>
+      <option value="06"[% IF from_month == '06' %] selected="selected"[% END %]>[% i18n('June') %]</option>
+      <option value="07"[% IF from_month == '07' %] selected="selected"[% END %]>[% i18n('July') %]</option>
+      <option value="08"[% IF from_month == '08' %] selected="selected"[% END %]>[% i18n('August') %]</option>
+      <option value="09"[% IF from_month == '09' %] selected="selected"[% END %]>[% i18n('September') %]</option>
+      <option value="10"[% IF from_month == '10' %] selected="selected"[% END %]>[% i18n('October') %]</option>
+      <option value="11"[% IF from_month == '11' %] selected="selected"[% END %]>[% i18n('November') %]</option>
+      <option value="12"[% IF from_month == '12' %] selected="selected"[% END %]>[% i18n('December') %]</option>
+    </select>
+    <select name="from_day">
+      <option value="01"[% IF from_day == '01' %] selected="selected"[% END %]>01</option>
+      <option value="02"[% IF from_day == '02' %] selected="selected"[% END %]>02</option>
+      <option value="03"[% IF from_day == '03' %] selected="selected"[% END %]>03</option>
+      <option value="04"[% IF from_day == '04' %] selected="selected"[% END %]>04</option>
+      <option value="05"[% IF from_day == '05' %] selected="selected"[% END %]>05</option>
+      <option value="06"[% IF from_day == '06' %] selected="selected"[% END %]>06</option>
+      <option value="07"[% IF from_day == '07' %] selected="selected"[% END %]>07</option>
+      <option value="08"[% IF from_day == '08' %] selected="selected"[% END %]>08</option>
+      <option value="09"[% IF from_day == '09' %] selected="selected"[% END %]>09</option>
+      <option value="10"[% IF from_day == '10' %] selected="selected"[% END %]>10</option>
+      <option value="11"[% IF from_day == '11' %] selected="selected"[% END %]>11</option>
+      <option value="12"[% IF from_day == '12' %] selected="selected"[% END %]>12</option>
+      <option value="13"[% IF from_day == '13' %] selected="selected"[% END %]>13</option>
+      <option value="14"[% IF from_day == '14' %] selected="selected"[% END %]>14</option>
+      <option value="15"[% IF from_day == '15' %] selected="selected"[% END %]>15</option>
+      <option value="16"[% IF from_day == '16' %] selected="selected"[% END %]>16</option>
+      <option value="17"[% IF from_day == '17' %] selected="selected"[% END %]>17</option>
+      <option value="18"[% IF from_day == '18' %] selected="selected"[% END %]>18</option>
+      <option value="19"[% IF from_day == '19' %] selected="selected"[% END %]>19</option>
+      <option value="20"[% IF from_day == '20' %] selected="selected"[% END %]>20</option>
+      <option value="21"[% IF from_day == '21' %] selected="selected"[% END %]>21</option>
+      <option value="22"[% IF from_day == '22' %] selected="selected"[% END %]>22</option>
+      <option value="23"[% IF from_day == '23' %] selected="selected"[% END %]>23</option>
+      <option value="24"[% IF from_day == '24' %] selected="selected"[% END %]>24</option>
+      <option value="25"[% IF from_day == '25' %] selected="selected"[% END %]>25</option>
+      <option value="26"[% IF from_day == '26' %] selected="selected"[% END %]>26</option>
+      <option value="27"[% IF from_day == '27' %] selected="selected"[% END %]>27</option>
+      <option value="28"[% IF from_day == '28' %] selected="selected"[% END %]>28</option>
+      <option value="29"[% IF from_day == '29' %] selected="selected"[% END %]>29</option>
+      <option value="30"[% IF from_day == '30' %] selected="selected"[% END %]>30</option>
+      <option value="31"[% IF from_day == '31' %] selected="selected"[% END %]>31</option>
+    </select>
+    </div>
+    <div><label>[% i18n('to') %]</label>
+      <input class="radio" type="radio" name="to_date" value="now"[% IF to_date_option == 'now' %] checked="checked"[% END %]/>[% i18n('today') %]</div>
+    <div><label>&nbsp;</label><input class="radio" type="radio" name="to_date" value="same"[% IF to_date_option == 'same' %] checked="checked"[% END %]/>[% i18n('same day') %]</div>
+    <div><label>&nbsp;</label><input class="radio" type="radio" name="to_date" value="date"[% IF to_date_option == 'date' %] checked="checked"[% END %]/>
+    <select name="to_year">
+      [% FOREACH year = years %]
+      <option value="[% year %]"[% IF to_year == year %] selected="selected"[% END %]>[% year %]</option>
+      [% END %]
+    </select>
+    <select name="to_month">
+      <option value="01"[% IF to_month == '01' %] selected="selected"[% END %]>[% i18n('January') %]</option>
+      <option value="02"[% IF to_month == '02' %] selected="selected"[% END %]>[% i18n('February') %]</option>
+      <option value="03"[% IF to_month == '03' %] selected="selected"[% END %]>[% i18n('March') %]</option>
+      <option value="04"[% IF to_month == '04' %] selected="selected"[% END %]>[% i18n('April') %]</option>
+      <option value="05"[% IF to_month == '05' %] selected="selected"[% END %]>[% i18n('May') %]</option>
+      <option value="06"[% IF to_month == '06' %] selected="selected"[% END %]>[% i18n('June') %]</option>
+      <option value="07"[% IF to_month == '07' %] selected="selected"[% END %]>[% i18n('July') %]</option>
+      <option value="08"[% IF to_month == '08' %] selected="selected"[% END %]>[% i18n('August') %]</option>
+      <option value="09"[% IF to_month == '09' %] selected="selected"[% END %]>[% i18n('September') %]</option>
+      <option value="10"[% IF to_month == '10' %] selected="selected"[% END %]>[% i18n('October') %]</option>
+      <option value="11"[% IF to_month == '11' %] selected="selected"[% END %]>[% i18n('November') %]</option>
+      <option value="12"[% IF to_month == '12' %] selected="selected"[% END %]>[% i18n('December') %]</option>
+    </select>
+    <select name="to_day">
+      <option value="01"[% IF to_day == '01' %] selected="selected"[% END %]>01</option>
+      <option value="02"[% IF to_day == '02' %] selected="selected"[% END %]>02</option>
+      <option value="03"[% IF to_day == '03' %] selected="selected"[% END %]>03</option>
+      <option value="04"[% IF to_day == '04' %] selected="selected"[% END %]>04</option>
+      <option value="05"[% IF to_day == '05' %] selected="selected"[% END %]>05</option>
+      <option value="06"[% IF to_day == '06' %] selected="selected"[% END %]>06</option>
+      <option value="07"[% IF to_day == '07' %] selected="selected"[% END %]>07</option>
+      <option value="08"[% IF to_day == '08' %] selected="selected"[% END %]>08</option>
+      <option value="09"[% IF to_day == '09' %] selected="selected"[% END %]>09</option>
+      <option value="10"[% IF to_day == '10' %] selected="selected"[% END %]>10</option>
+      <option value="11"[% IF to_day == '11' %] selected="selected"[% END %]>11</option>
+      <option value="12"[% IF to_day == '12' %] selected="selected"[% END %]>12</option>
+      <option value="13"[% IF to_day == '13' %] selected="selected"[% END %]>13</option>
+      <option value="14"[% IF to_day == '14' %] selected="selected"[% END %]>14</option>
+      <option value="15"[% IF to_day == '15' %] selected="selected"[% END %]>15</option>
+      <option value="16"[% IF to_day == '16' %] selected="selected"[% END %]>16</option>
+      <option value="17"[% IF to_day == '17' %] selected="selected"[% END %]>17</option>
+      <option value="18"[% IF to_day == '18' %] selected="selected"[% END %]>18</option>
+      <option value="19"[% IF to_day == '19' %] selected="selected"[% END %]>19</option>
+      <option value="20"[% IF to_day == '20' %] selected="selected"[% END %]>20</option>
+      <option value="21"[% IF to_day == '21' %] selected="selected"[% END %]>21</option>
+      <option value="22"[% IF to_day == '22' %] selected="selected"[% END %]>22</option>
+      <option value="23"[% IF to_day == '23' %] selected="selected"[% END %]>23</option>
+      <option value="24"[% IF to_day == '24' %] selected="selected"[% END %]>24</option>
+      <option value="25"[% IF to_day == '25' %] selected="selected"[% END %]>25</option>
+      <option value="26"[% IF to_day == '26' %] selected="selected"[% END %]>26</option>
+      <option value="27"[% IF to_day == '27' %] selected="selected"[% END %]>27</option>
+      <option value="28"[% IF to_day == '28' %] selected="selected"[% END %]>28</option>
+      <option value="29"[% IF to_day == '29' %] selected="selected"[% END %]>29</option>
+      <option value="30"[% IF to_day == '30' %] selected="selected"[% END %]>30</option>
+      <option value="31"[% IF to_day == '31' %] selected="selected"[% END %]>31</option>
+    </select>
+    </div>
+    <div><label>[% i18n('email/domain') %]</label>
+      <input type="text" size="20" name="email" value="[% email %]" />
+    </div>
+    <div><label>[% i18n('filter type') %]</label>
+      <select name="filter_type">
+        <option value="all">[% i18n('All') %]</option>
+        [% FOREACH type = filter_types %]
+        <option value="[% type %]"[% IF filter_type == type %] selected="selected"[% END %]>[% type %]</option>
+        [% END %]
+      </select>
+    </div>
+    <div><label>[% i18n('display') %]</label>
+      [% IF admin %]<select name="display">
+        <option value="email"[% IF display == 'email' %] selected="selected"[% END %]>[% i18n('by email') %]</option>
+	<option value="date"[% IF display == 'date' %] selected="selected"[% END %]>[% i18n('by date') %]</option>
+      </select>[% END %]
+      <select name="results">
+        <option value="25"[% IF results == '25' %] selected="selected"[% END %]>25</option>
+	<option value="50"[% IF results == '50' %] selected="selected"[% END %]>50</option>
+	<option value="100"[% IF results == '100' %] selected="selected"[% END %]>100</option>
+      </select> [% i18n('messages') %] [% i18n('per page') %]
+    </div>
+    <div class="button"><input class="button" type="submit" value="[% i18n('Search') %]" name="submit"/></div>
+    </form>
+        </div> <!-- #form -->
+
+    <div id="data">
+    [% IF msgs && (msgs.DAYS.size > 0 OR users.size > 0) %]
+    [% BLOCK pages_block %]<span>[% IF page > 1 %]<a href="[% self_url %];page=[% (page - 1) %]">&lt;</a> [% END %]
+    [% FOREACH p IN pages %]
+      [% IF p == '...' %][% p %]
+      [% ELSIF p != page %]<a href="[% self_url %];page=[% p %]">[% p %]</a>
+      [% ELSE %]<b>[% p %]</b>[% END %] 
+    [% END %]
+    [% IF p != page %]<a href="[% self_url %];page=[% (page + 1) %]">&gt;</a> [% END %]</span>[% END %]
+    <p class="nav">[% INCLUDE pages_block %][% msgs.COUNT %] [% i18n('messages found') %]</p>
+      [% IF display == 'email' %][% INCLUDE search_table_email.html %]
+      [% ELSIF display == 'date' %][% INCLUDE search_table_date.html %][% END %]
+    <p class="nav">[% INCLUDE pages_block %]</p>
+    [% END %]
+    </div> <!-- #data -->
+
+      </div> <!-- #contents -->
+    </div> <!-- #main -->
+    [% PROCESS footer.html %]
+  </div> <!-- #container -->
+
+</body>
+</html>

@@ -1,0 +1,43 @@
+[% PROCESS header.html %]
+
+<body>
+
+  <div id="container">
+    <div id="info">
+    [% IF username %]
+      <form method="get" action="[% cgibin_path %]/login.cgi/logout"><p>[% username %][% IF admin %] (administration)[% END %]
+      <input class="button" type="submit" value="[% i18n('Logout') %]" /></p></form>
+    [% ELSE %]
+      <p></p>
+    [% END %]
+    </div>
+    <div id="menu">
+      <ul id="primary">
+[% IF username %]
+        <li><a href="[% cgibin_path %]/stats.cgi">[% i18n('statistics') %]</a></li>
+	<li><a href="[% cgibin_path %]/search.cgi">[% i18n('search') %]</a></li>
+	[% IF amavisdnew %]<li><a href="[% cgibin_path %]/prefs.cgi">[% i18n('preferences') %]</a></li>[% END %]
+	<li><span>[% i18n('help') %]</span>
+	  <ul id="secondary">
+	    <li><a href="#statistics">[% i18n('statistics') %]</a></li>
+	    <li><a href="#search">[% i18n('search') %]</a></li>
+	    [% IF amavisdnew %]<li><a href="#preferences">[% i18n('preferences') %]</a></li>[% END %]
+	    <li><a href="#filtertypes">[% i18n('appendix: filter types') %]</a></li>
+	  </ul>
+	</li>
+[% ELSE %]
+        <li><a href="[% cgibin_path %]/login.cgi">[% i18n('login') %]</a></li>
+	<li><span>[% i18n('about') %]</span></li>
+[% END %]
+      </ul>
+    </div>
+    <div id="main">
+      <div id="contents"><div class="fixed">
+      [% INCLUDE "help_${lang}.html" %]
+      </div></div> <!-- #contents -->
+    </div> <!-- #main -->
+    [% PROCESS footer.html %]
+  </div> <!-- #container -->
+
+</body>
+</html>

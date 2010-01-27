@@ -1,0 +1,19 @@
+    <table>
+    [% FOREACH day = msgs.DAYS %]
+      <tr class="rowOdd"><th>&nbsp;</th><th>[% i18n('time') %]</th><th>[% i18n('recipient') %]</th><th>[% i18n('sender') %]</th><th>[% i18n('filter type') %]</th><th>[% i18n('filter method') %]</th></tr>
+      <tr><td class="subtitle" colspan="6">[% day %]</td></tr>
+      [% FOREACH msg = msgs.$day %]
+        <tr class="row[% strip(loop.count) %]">
+	  <td>[% IF msg.rawsource_length > 0 %]<a href="javascript:open_rawsource_popup('[% msg.id %]');" onMouseOut="window.status='';" onMouseOver="window.status='View rawsource'; return true;"><img src="[% htdocs_path %]/images/rawsource.gif" width="14" height="10" alt="rawsource" /></a>[% ELSE %]&nbsp;[% END %]</td>
+          <td>[% msg.logtime %]</td>
+	  <td><a href="#" onclick="toggle('[% msg.id %]'); return false" title="[% i18n('click to show details') %]">[% msg.to_addr %]</a></td>
+          <td><a href="#" onclick="toggle('[% msg.id %]'); return false" title="[% i18n('click to show details') %]">[% msg.from_addr %]</a></td>
+          <td>[% msg.filter_type %]</td>
+	  <td>[% msg.filter_id %]</td>
+	</tr>
+	<tr class="closed" id="[% msg.id %]">
+          <td colspan="6" class="description"><span>[% msg.description %]</span></td>
+        </tr>
+      [% END %]
+    [% END %]
+    </table>

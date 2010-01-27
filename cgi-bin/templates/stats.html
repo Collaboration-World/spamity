@@ -1,0 +1,57 @@
+[% PROCESS header.html %]
+
+<body>
+
+  <div id="container">
+    <div id="info">
+      <form method="get" action="[% cgibin_path %]/login.cgi/logout"><p>[% username %][% IF admin %] (administration)[% END %]
+      <input class="button" type="submit" value="[% i18n('Logout') %]" /></p></form>
+    </div>
+    <div id="menu">
+      <ul id="primary">
+        <li><span>[% i18n('statistics') %]</span>
+	  <ul id="secondary">
+	    <li><a href="[% cgibin_path %]/stats.cgi">[% i18n('summary') %]</a></li>
+	    [% IF admin %]<li class="tertiary"><a href="[% cgibin_path %]/stats.cgi/all_day">[% i18n('last 24 hours') %]</a></li><li><a href="[% cgibin_path %]/stats.cgi/most_day">([% i18n('top 20') %])[% ELSE %]<li><a href="[% cgibin_path %]/stats.cgi/day">[% i18n('last 24 hours') %][% END %]</a></li>
+	    [% IF admin %]<li class="tertiary"><a href="[% cgibin_path %]/stats.cgi/all_week">[% i18n('last week') %]</a></li><li><a href="[% cgibin_path %]/stats.cgi/most_week">([% i18n('top 20') %])[% ELSE %]<li><a href="[% cgibin_path %]/stats.cgi/week">[% i18n('last week') %][% END %]</a></li>
+	    [% IF admin %]<li class="tertiary"><a href="[% cgibin_path %]/stats.cgi/all_month">[% i18n('last month') %]</a></li><li><a href="[% cgibin_path %]/stats.cgi/most_month">([% i18n('top 20') %])[% ELSE %]<li><a href="[% cgibin_path %]/stats.cgi/month">[% i18n('last month') %][% END %]</a></li>
+	  </ul>
+	</li>
+	<li><a href="[% cgibin_path %]/search.cgi">[% i18n('search') %]</a></li>
+	[% IF prefs %]<li><a href="[% cgibin_path %]/prefs.cgi">[% i18n('preferences') %]</a></li>[% END %]
+	<li><a href="[% cgibin_path %]/help.cgi">[% i18n('help') %]</a></li>
+      </ul>
+    </div> <!-- #menu -->
+    <div id="main">
+      <div id="contents">
+        [% IF message %]<p>[% message %]</p>[% END %]
+
+	[% IF graphs %]
+	  [% FOREACH graph = graphs %]
+	  <h2 class="fixed">[% graph.title %]</h2>
+	  <p><img src="[% cgibin_path %]/graph.cgi/[% graph.url %]/[% sid %]" alt="[% graph.title %]" width="500" height="350" /></p>
+	  [% END %]
+	[% END %]
+
+	[% IF msgs %]
+	<h2 class="fixed">[% i18n('latest rejected messages') %]</h2>
+	<br/>
+	<div id="data">
+        [% INCLUDE search_table_date.html %]
+	</div>
+	[% ELSIF stats %]
+	<div id="form">
+	<h2>[% stats.title %]</h2>
+	[% FOREACH row = stats.data %]
+	  <div><label>[% row.count %]</label><a href="[% cgibin_path %]/search.cgi?domain=all;display=date;from_year=[% from_year %];from_month=[% from_month %];from_day=[% from_day %];to_date=now;email=[% row.to_addr | uri %];submit=Search">[% row.to_addr %]</a></div>
+        [% END %]
+	</div>
+	[% END %]
+
+      </div> <!-- #contents -->
+    </div> <!-- #main -->
+    [% PROCESS footer.html %]
+  </div> <!-- #container -->
+
+</body>
+</html>

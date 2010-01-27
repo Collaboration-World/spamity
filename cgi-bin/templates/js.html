@@ -1,0 +1,35 @@
+<script language="javascript" type="text/javascript">
+<!--
+function toggle(id) {
+  var e = document.getElementById(id);
+  if (e) {
+    if (e.className == "closed")
+      e.className = "open";
+    else
+      e.className = "closed";
+  }
+}
+
+function open_rawsource_popup(message_id) {
+    var name = "rawsource:" + message_id; name = name.replace(/\:/g,'_');
+    var url = "[% cgibin_path %]/rawsource.cgi/" + message_id + "/";
+    var Width = screen.width;
+    if (Width > 775) {
+        Width = 700;
+    } else {
+        Width -= 75;
+    }
+    var Height = screen.height;
+    if (Height > 725) {
+        Height = 650;
+    } else {
+        Height -= 75;
+    }
+    param = "toolbar=no,location=no,status=yes,scrollbars=yes,resizable=yes,width=" + Width + ",height=" + Height + ",left=0,top=0";
+    eval("name = window.open(url, name, param)");
+    if (!eval("name.opener")) {
+        eval("name.opener = self");
+    }
+}
+// -->
+</script>

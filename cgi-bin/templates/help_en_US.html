@@ -1,0 +1,43 @@
+[% IF username %]
+<h2><a name="statistics"></a>[% i18n('statistics') %]</h2>
+<ul>
+  <li><strong>[% i18n('summary') %]</strong> - Overview of all messages blocked [% IF NOT admin %]for your email address(es) [% END %]and known by the system as a graph presented by <a href="#filtertypes">filter type</a>. Also available are the [% IF admin %]20[% ELSE %]10[% END %] latest rejected messages.</li>
+  <li><strong>[% i18n('last 24 hours') %]</strong> - Graph of the number of messages rejected [% IF NOT admin %]for your email address(es) [% END %] during the last 24 hours.</li>
+  <li><strong>[% i18n('last week') %]</strong> - Graph of the number of messages rejected [% IF NOT admin %]for your email address(es) [% END %] during the last week.</li>
+  <li><strong>[% i18n('last month') %]</strong> - Graph of the number of messages rejected [% IF NOT admin %]for your email address(es) [% END %] during the last month.</li>
+  [% IF admin %]<li><strong>(top 20)</strong> - See the 20 most spammed addresses for a specific period.</li>[% END %]
+</ul>
+<h2><a name="search"></a>[% i18n('search') %]</h2>
+<ul>
+  <li>Perform a search among the rejected messages [% IF NOT admin %]for your email address(es) [% END %]using various criterias.</li>
+  <li>To search for messages associated to a specific domain, write this domain in the field <i>[% i18n('email/domain') %]</i>, without the <i>@</i> (ie <i>host.tld</i>).</li>
+  <li>Depending on the installation, some or all of the blocked messages are quarantined. An envelope icon (<img src="[% htdocs_path %]/images/rawsource.gif" width="14" height="10" alt="rawsource"/>) appears next to those quarantined messages. You can view a quarantined message by clicking on this icon and eventually reinject the message in case you consider the message legitimate.</li>
+<li>Search results are displayed by email, chronologically.[% IF admin %] As an administrator, you can choose to display the results by date, reverse chronologically.[% END %]</li>
+</ul>
+[% IF amavisdnew %]<h2><a name="preferences"></a>[% i18n('preferences') %]</h2>
+<ul>
+  <li>Configure the anti-spam policy for each of your email addresses. The <i>default</i> policy is defined by your system administrator. Additional pre-defined policies may be available. Select <i>[% i18n('customized') %]</i> if you want to change each of the available parameters.</li>
+  <li><strong>[% i18n('tolerence') %]</strong> - Some filtering methods can be activated or not. When a method is disactivated, it is possible to specify an address extension (for example, specifying <i>spam</i> as an address extension makes the recipient address changed from <i>user@host.tld</i> to <i>user+spam@host.tld</i> when the filter applies to the message).</li>
+  <li><strong>[% i18n('spam levels') %]</strong> - To each message is attributed a spam level. Three (3) thresholds engage specific actions (tag and/or kill). When a message is tagged, it is also possible to modify the subject with a prefix.</li>
+  <li><strong>[% i18n('lists') %]</strong> - When using a pre-defined policy or a customized policy, you can blacklist or whitelist addresses (<i>user@host.tld</i>), domains (<i>@host.tld</i>), or users (<i>user</i>).
+</ul>[% END %]
+<h2><a name="filtertypes"></a>[% i18n('appendix: filter types') %]</h2>
+<ul>
+  <li><strong>rbl</strong> - Message rejected by a <i>Realtime Blackhole List</i></li>
+  <li><strong>rhsbl client</strong> - Message rejected by <i>Right Hand Side Block List</i></li>
+  <li><strong>header date</strong> - Message has a date from the past or the future</li>
+  <li><strong>header suject</strong> - Message rejected by suspicious subject; filter method starts with the letter <i>h</i></li>
+  <li><strong>header x-mailer</strong> - Message rejected by suspicious mailer</li>
+  <li><strong>header content-disposition</strong> - Message rejected by suspicious attachment</li>
+  <li><strong>header content-type</strong> - Message rejected by suspicious attached file; filter method specifies the file extension</li>
+  <li><strong>body</strong> - Message rejected by suspicious body content; filter method starts with the letter <i>b</i></li>
+  <li><strong>access username</strong> - Message rejected by access username</li>
+  <li><strong>virus</strong> - Message rejected by the antivirus software; filter method starts with <i>virus-</i></li>
+  <li><strong>spam</strong> - Message rejected by <a href="http://www.spamassassin.org/">SpamAssassin</a>; filter method starts with <i>spam-</i></li>
+  <li><strong>banned</strong> - Message rejected by prohibited attached file</li>
+  <li><strong>helo</strong> - Message rejected by an unacceptable or missing <i>HELO</i> command.</li>
+</ul>
+[% ELSE %]
+<p>This is your rejected spam management interface where you can view the messages blocked for your email address(es).</p>
+<p>Login to be able to search the latest spam rejected by the system.</p>
+[% END %]

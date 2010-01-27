@@ -1,0 +1,34 @@
+[% PROCESS header.html %]
+
+<body>
+
+  <div id="container">
+    <div id="info">
+      <p></p>
+    </div>
+    <div id="menu">
+      <ul id="primary">
+        <li><span>[% i18n('login') %]</span></li>
+	<li><a href="[% cgibin_path %]/help.cgi">[% i18n('about') %]</a></li>
+      </ul>
+    </div>
+    <div id="main">
+      <div id="contents">
+        [% IF error %]<p class="error">[% error %]</p>[% END %]
+	<div id="form">
+          <form method="post" action="[% cgibin_path %]/login.cgi">
+	    <div><label>[% i18n('username') %]</label><input type="text" name="username" value="[% username %]"/></div>
+	    <div><label>[% i18n('password') %]</label><input type="password" name="password"/></div>
+	    <div><label>[% i18n('language') %]</label><select name="lang">
+	        <option value="en_US"[% IF lang == 'en_US' %] selected="selected"[% END %]>English</option>
+	        <option value="fr_CA"[% IF lang == 'fr_CA' %] selected="selected"[% END %]>Français</option></select></div>
+	    <div class="button"><input class="button" type="submit" name="login" value="[% i18n('Login') %]"/></div>
+	  </form>
+	</div> <!-- #form -->
+      </div> <!-- #contents -->
+    </div> <!-- #main -->
+    [% PROCESS footer.html %]
+  </div> <!-- #container -->
+
+</body>
+</html>

@@ -1,0 +1,18 @@
+	<h3>[% i18n('tolerence') %]</h3>
+	[% IF policy_columns.spam_lover %]<div><label>&nbsp;</label>[% IF policy.spam_lover %][% i18n('accept') %][% ELSE %][% i18n('reject') %][% END %] [% i18n('spam') %]</div>
+	[% IF policy_columns.addr_extension_spam AND policy.spam_lover AND policy.addr_extension_spam %]<div class="note">[% i18n('address extension') %] <b>[% policy.addr_extension_spam %]</b></div>[% END %][% END %]
+	[% IF policy_columns.virus_lover %]<div><label>&nbsp;</label>[% IF policy.virus_lover %][% i18n('accept') %][% ELSE %][% i18n('reject') %][% END %] [% i18n('virus') %]</div>
+	[% IF policy_columns.addr_extension_virus AND policy.virus_lover AND policy.addr_extension_virus %]<div class="note">[% i18n('address extension') %] <b>[% policy.addr_extension_virus %]</b></div>[% END %][% END %]
+	[% IF policy_columns.banned_files_lover %]<div><label>&nbsp;</label>[% IF policy.banned_files_lover %][% i18n('accept') %][% ELSE %][% i18n('reject') %][% END %] [% i18n('banned files') %]</div>
+	[% IF policy_columns.addr_extension_banned AND policy.banned_files_lover AND policy.addr_extension_banned %]<div class="note">[% i18n('address extension') %] <b>[% policy.addr_extension_banned %]</b></div>[% END %][% END %]
+	[% IF policy_columns.bad_header_lover %]<div><label>&nbsp;</label>[% IF policy.bad_header_lover %][% i18n('accept') %][% ELSE %][% i18n('reject') %][% END %] [% i18n('bad header') %]</div>
+	[% IF policy_columns.addr_extension_bad_header AND policy.bad_header_lover AND policy.addr_extension_bad_header %]<div class="note">[% i18n('address extension') %] <b>[% policy.addr_extension_bad_header %]</b></div>[% END %][% END %]
+	[% IF NOT policy_columns.bypass_spam_checks OR NOT policy.bypass_spam_checks %]<h3>[% i18n('spam levels') %]</h3>
+	<div><label>[<b>[% policy.spam_tag_level %]</b>]</label><span>[% i18n('tag level') %]</span></div>
+	[% IF policy_columns.spam_subject_tag AND policy.spam_subject_tag %]<div class="note">[% i18n('subject prefix') %] <b>[% policy.spam_subject_tag %]</b></div>[% END %]
+	<div class="note">[% i18n('Controls adding the \'X-Spam-Status\' and \'X-Spam-Level\' headers.') %]</div>
+	<div><label>[<b>[% policy.spam_tag2_level %]</b>]</label><span>[% i18n('2nd tag level') %]</span></div>
+	[% IF policy_columns.spam_subject_tag2 AND policy.spam_subject_tag2 %]<div class="note">[% i18n('subject prefix') %] <b>[% policy.spam_subject_tag2 %]</b></div>[% END %]
+	<div class="note">[% i18n('Controls adding \'X-Spam-Flag: YES\', and editing Subject.') %]</div>
+	<div><label>[<b>[% policy.spam_kill_level %]</b>]</label><span>[% i18n('kill level') %]</span></div>
+	<div class="note">[% i18n('Controls \'evasive actions\' (reject, quarantine, extensions). Subject to amavis settings.') %]</div>[% END %]

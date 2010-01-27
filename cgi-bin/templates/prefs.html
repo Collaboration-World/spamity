@@ -1,0 +1,61 @@
+[% PROCESS header.html %]
+
+<body>
+
+  <div id="container">
+    <div id="info">
+      <form method="get" action="[% cgibin_path %]/login.cgi/logout"><p>[% username %][% IF admin %] (administration)[% END %]
+      <input class="button" type="submit" value="[% i18n('Logout') %]" /></p></form>
+    </div>
+    <div id="menu">
+      <ul id="primary">
+        <li><a href="[% cgibin_path %]/stats.cgi">[% i18n('statistics') %]</a></li>
+	<li><a href="[% cgibin_path %]/search.cgi">[% i18n('search') %]</a></li>
+	<li><span>[% i18n('preferences') %]</span>
+	  <ul id="secondary">
+	    [% IF spamity_prefs %]<li><a href="[% cgibin_path %]/prefs.cgi">[% i18n('preferences') %]</a></li>[% END %][% FOREACH address = addresses %]
+	    <li><a href="[% cgibin_path %]/prefs.cgi/[% (loop.index + 1) %]">[% address %]</a></li>
+	  [% END %]</ul>
+	</li>
+	<li><a href="[% cgibin_path %]/help.cgi">[% i18n('help') %]</a></li>
+      </ul>
+    </div> <!-- #menu -->
+    <div id="main">
+      <div id="contents">
+      [% IF message %]<p>[% message %]</p>[% END %][% IF error %]<p class="error">[% error %]</p>[% END %]
+      <div id="form">
+      [% IF email %]
+      [% IF admin %]<form method="post" action="[% cgibin_path %]/prefs.cgi">
+      <div><label>[% i18n('Other email') %]</label><input type="text" name="action" size="20" maxlength="64"/></div>
+      <div class="button"><input class="button" type="submit" name="edit" value="[% i18n('Edit') %]"/></div>
+      </form><br/>[% END %]
+      <form name="prefs" method="post" action="[% cgibin_path %]/prefs.cgi">
+      <input type="hidden" name="action" value="[% action %]"/>
+        <div><label>[% i18n('policy for') %]</label><span><b>[% email %]</b>
+	  <select onChange="document.prefs.submit();" name="policy">
+	    <option value="DEFAULT">[% i18n('default') %]</option>
+	  [% FOREACH p = policies %]
+	    <option value="[% p.key %]"[% IF policy.id == p.key %] selected="selected"[% END %]>[% p.value %]</option>
+	  [% END %]
+	    <option value="CUSTOM"[% IF policy.id == 'CUSTOM' %] selected="selected"[% END %]>[% i18n('customized') %]</option>
+	  </select></span>
+	</div>
+	[% IF policy.id == 'CUSTOM' %][% INCLUDE prefs_policy_custom.html %]
+	[% ELSE %][% INCLUDE prefs_policy_static.html %][% END %]
+	[%# IF policy.id == 'DEFAULT' OR policy.policy_name %][%# INCLUDE prefs_policy_static.html %]
+	[% #ELSE %][% #INCLUDE prefs_policy_custom.html %][% #END %]
+	[%# IF policy.id != 'DEFAULT' AND (NOT policy_columns.bypass_spam_checks OR NOT policy.bypass_spam_checks) %]<h3>[% i18n('lists') %]</h3>
+	<div><span style="float: left; width: 50%; margin-left: 0px;"><div style="margin: 0 10px 20px 0;">[% i18n('whitelist') %]<br/><textarea name="wl" rows="20" cols="20" style="width: 100%;">[% FOREACH address = whitelist %][% address %]
+[% END %]</textarea></div></span><span style="float: right; width: 50%; margin-left: 0px;"><div style="margin: 0 0 20px 10px;">[% i18n('blacklist') %]<br/><textarea name="bl" rows="20" cols="20" style="width: 100%;">[% FOREACH address = blacklist %][% address %]
+[% END %]</textarea></div></span></div>
+         <div class="button"><input class="button" type="submit" name="cancel" value="[% i18n('Cancel') %]"/> <input class="button" type="submit" name="save" value="[% i18n('Save') %]"/></div></form>[% ELSIF prefs %][% INCLUDE prefs_spamity.html %][% END %]
+      [%# END %]
+      </div> <!-- #form -->
+
+      </div> <!-- #contents -->
+    </div> <!-- #main -->
+    [% PROCESS footer.html %]
+  </div> <!-- #container -->
+
+</body>
+</html>

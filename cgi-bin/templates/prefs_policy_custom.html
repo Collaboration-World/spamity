@@ -1,0 +1,18 @@
+	<h3>[% i18n('tolerence') %]</h3>
+	[% IF policy_columns.spam_lover %]<div><label><input type="checkbox" name="spam_lover" value="Y"[% IF policy.spam_lover %] checked="checked"[% END %]/></label>[% i18n('accept') %] [% i18n('spam') %]</div>
+	[% IF policy_columns.addr_extension_spam %]<div class="note">[% i18n('address extension') %] <input type="text" name="addr_extension_spam" size="20" maxlength="64" value="[% policy.addr_extension_spam %]"/> [% i18n('(optional)') %]</div>[% END %][% END %]
+	[% IF policy_columns.virus_lover %]<div><label><input type="checkbox" name="virus_lover" value="Y"[% IF policy.virus_lover %] checked="checked"[% END %]/></label>[% i18n('accept') %] [% i18n('virus') %]</div>
+	[% IF policy_columns.addr_extension_virus %]<div class="note">[% i18n('address extension') %] <input type="text" name="addr_extension_virus" size="20" maxlength="64" value="[% policy.addr_extension_virus %]"/> [% i18n('(optional)') %]</div>[% END %][% END %]
+	[% IF policy_columns.banned_files_lover %]<div><label><input type="checkbox" name="banned_files_lover" value="Y"[% IF policy.banned_files_lover %] checked="checked"[% END %]/></label>[% i18n('accept') %] [% i18n('banned files') %]</div>
+	[% IF policy_columns.addr_extension_banned %]<div class="note">[% i18n('address extension') %] <input type="text" name="addr_extension_banned" size="20" maxlength="64" value="[% policy.addr_extension_banned %]"/> [% i18n('(optional)') %]</div>[% END %][% END %]
+	[% IF policy_columns.bad_header_lover %]<div><label><input type="checkbox" name="bad_header_lover" value="Y"[% IF policy.bad_header_lover %] checked="checked"[% END %]/></label>[% i18n('accept') %] [% i18n('bad header') %]</div>
+	[% IF policy_columns.addr_extension_bad_header %]<div class="note">[% i18n('address extension') %] <input type="text" name="addr_extension_bad_header" size="20" maxlength="64" value="[% policy.addr_extension_bad_header %]"/> [% i18n('(optional)') %]</div>[% END %][% END %]
+	<h3>[% i18n('spam levels') %]</h3>
+	<div><label><input type="text" size="4" maxlength="4" name="spam_tag_level" value="[% policy.spam_tag_level %]"></label>[% i18n('tag level') %]</div>
+	[% IF policy_columns.spam_subject_tag %]<div class="note">[% i18n('subject prefix') %] <input type="text" name="spam_subject_tag" size="20" maxlength="64" value="[% policy.spam_subject_tag %]"/> [% i18n('(optional)') %]</div>[% END %]
+	<div class="note"><i>[% i18n('Controls adding the \'X-Spam-Status\' and \'X-Spam-Level\' headers.') %]</i></div>
+	<div><label><input type="text" size="4" maxlength="4" name="spam_tag2_level" value="[% policy.spam_tag2_level %]"/></label>[% i18n('2nd tag level') %]</div>
+	[% IF policy_columns.spam_subject_tag2 %]<div class="note">[% i18n('subject prefix') %] <input type="text" name="spam_subject_tag2" size="20" maxlength="64" value="[% policy.spam_subject_tag2 %]"/> [% i18n('(optional)') %]</div>[% END %]
+	<div class="note"><i>[% i18n('Controls adding \'X-Spam-Flag: YES\', and editing Subject.') %]</i></div>
+	<div><label><input type="text" size="4" maxlength="4" name="spam_kill_level" value="[% policy.spam_kill_level %]"/></label>[% i18n('kill level') %]</div>
+	<div class="note"><i>[% i18n('Controls \'evasive actions\' (reject, quarantine, extensions). Subject to amavis settings.') %]</i></div>
