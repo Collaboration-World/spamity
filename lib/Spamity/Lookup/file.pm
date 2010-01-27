@@ -3,7 +3,7 @@
 #  $Source: /opt/cvsroot/projects/Spamity/lib/Spamity/Lookup/file.pm,v $
 #  $Name:  $
 #
-#  Copyright (c) 2004, 2005, 2006, 2007
+#  Copyright (c) 2004, 2005, 2006, 2007, 2010
 #
 #  Author: Francis Lachapelle <francis@Sophos.ca>
 #
@@ -168,7 +168,7 @@ sub getUsersByAddress
 	while (<FILE>) {
 	    chomp; $line = $_;
 	    if ($line =~ m/^\@$domain\s+(.+(?:,.+)?)$/i ||     # catchall
-		$line =~ m/^(?!#)$address\s+(.+(?:,.+)?)$/i)
+		$line =~ m/^(?!#)\Q$address\E\s+(.+(?:,.+)?)$/i)
 	    {
 		# File is an addresses table
 		$list = $1;
