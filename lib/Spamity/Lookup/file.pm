@@ -178,7 +178,7 @@ sub getUsersByAddress
 	    }
 	    elsif ($address =~ m/^(.+)\@$master_domain$/i) {
 		$alias = $1;
-		if ($line =~ m/^$alias:\s+(.+(?:,.+)?)$/i) {
+		if ($line =~ m/^\Q$alias\E:\s+(.+(?:,.+)?)$/i) {
 		    # File is an aliases table
 		    $list = $1;
 		    $list =~ s/\s//g;
