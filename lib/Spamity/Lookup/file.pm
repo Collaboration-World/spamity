@@ -54,6 +54,7 @@ domains_maps = /etc/postfix/virtual
 use Spamity qw(conf logPrefix);
 
 my %addresses;
+my %files;
 my %localAddresses;
 
 
@@ -144,6 +145,7 @@ sub getUsersByAddress
     my @users_unique;
     my $line;
     my $domain;
+    my $current_address;
     my $list;
     my $alias;
     my $master_domain = &conf('master_domain');
@@ -152,54 +154,65 @@ sub getUsersByAddress
     $address = lc($address);
     if ($address =~ m/\@(.*)$/) { $domain = $1 }
     
+    if (! open (FILE, $file)) {
+      $message = "Can't open addresses table $file: $!.";
+      warn logPrefix,"Spamity::Lookup::file getUsersByAddress ($file, $address) $message\n";
+    }
+    else {
+      my $mtime = (stat(FILE))[9];
+
     # We use a local hash to cache addresses since this function
     # is to be used by the daemon and not the CGI scripts
-    if (%addresses && exists($addresses{$address})) {
+    if (%files && exists($files{$file}) && $files{$file} == $mtime) { #%addresses && exists($addresses{$address})) {
 	# Address has been previously resolved
 #	warn "[DEBUG CACHE] Spamity::Lookup::file getUsersByAddress $address: ",join(',', @{$addresses{$address}}),"\n" if (int(&conf('log_level')) > 1);
 	return @{$addresses{$address}};
     }
     
-    if (! open (FILE, $file)) {
-	$message = "Can't open addresses table $file: $!.";
-	warn logPrefix,"Spamity::Lookup::file getUsersByAddress ($file, $address) $message\n";
-    }
-    else {
-	while (<FILE>) {
+      if (exists($files{$file})) {
+	$message = "Reloading $file";
+      }
+      else {
+	$message = "Loading $file";
+      }
+      warn logPrefix,"Spamity::Lookup::file getUsersByAddress $message\n";
+      $files{$file} = $mtime;
+
+      while (<FILE>) {
 	    chomp; $line = $_;
-	    if ($line =~ m/^\@$domain\s+(.+(?:,.+)?)$/i ||     # catchall
-		$line =~ m/^(?!#)\Q$address\E\s+(.+(?:,.+)?)$/i)
-	    {
+	    #if ($line =~ m/^\@$domain\s+(.+(?:,.+)?)$/i ||     # We no longer support catchall
+	    if ($line =~ m/^(?!#)(\S+\@\S+)\s+(.+(?:,.+)?)$/i) {
 		# File is an addresses table
-		$list = $1;
+	        $current_address = $1;
+		$list = $2;
 		$list =~ s/\s//g;
 		$list =~ s/\@$master_domain//g;
-		push(@users, split(",", $list));
+		push(@{$addresses{$current_address}}, split(",", $list));
+	      }
+	    elsif ($line =~ m/^(\S+\@$master_domain):\s+(.+(?:,.+)?)$/i) {
+	      # File is an aliases table
+	      $current_address = $1;
+	      $list = $2;
+	      $list =~ s/\s//g;
+	      push(@{$addresses{$current_address}}, split(",", $list));
 	    }
-	    elsif ($address =~ m/^(.+)\@$master_domain$/i) {
-		$alias = $1;
-		if ($line =~ m/^\Q$alias\E:\s+(.+(?:,.+)?)$/i) {
-		    # File is an aliases table
-		    $list = $1;
-		    $list =~ s/\s//g;
-		    push(@users, split(",", $list));
-		}
-	    }
-	}
+	  }
 	close FILE;
     }
     
     # Remove duplicates and forwards
     my %seen = ();
-    my $user;
-    foreach $user (@users) {
+    foreach $current_address (keys %addresses) {
+      @users = @{$addresses{$current_address}};
+      @users_unique = ();
+      foreach my $user (@users) {
 	push(@users_unique, $user) unless ($seen{$user}++ || $user =~ m/\@/);
+      }
+      # Cache lookup
+      push(@{$addresses{$current_address}}, @users_unique);
     }
     
-    # Cache lookup
-    push(@{$addresses{$address}}, @users_unique);
-	    
-    return @users_unique;
+    return @{$addresses{$address}};
 
 } # getUsersByAddress
 
