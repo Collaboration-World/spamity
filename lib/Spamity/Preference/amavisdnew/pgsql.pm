@@ -1,9 +1,9 @@
 #!/usr/bin/perl
 #
-#  $Source: /opt/cvsroot/projects/Spamity/lib/Spamity/Preference/amavisdnew/pgsql.pm,v $
+#  $Source:  $
 #  $Name:  $
 #
-#  Copyright (c) 2004, 2005, 2006, 2007
+#  Copyright (c) 2004-2007, 2010
 #
 #  Author: Francis Lachapelle <francis@Sophos.ca>
 #
@@ -156,7 +156,7 @@ sub _setList
 	}
 
 	# Clean unused addresses
-	$stmt = 'delete from mailaddr where mailaddr.id not in (select sid from wblist wb where mailaddr.id = wb.sid)';
+	$stmt = 'delete from mailaddr where mailaddr.id not in (select sid from wblist)';
 	$sth = $db->dbh->prepare($stmt);
 	if (!$sth->execute()) {
 	    $message = 'Delete-statement error: '.$DBI::errstr.' ('.$DBI::err.').';

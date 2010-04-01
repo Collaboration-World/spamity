@@ -1,3 +1,8 @@
+2010-04-01  Francis Lachapelle  <flachapelle@inverse.ca>
+
+	* lib/Spamity/Preference/amavisdnew/pgsql.pm (_setList): fixed
+	delete statement that would take too much time to execute.
+
 2007-10-29 Francis Lachapelle <francis@Sophos.ca>
 
 	* Improved parsing for check_sender_access maps.
