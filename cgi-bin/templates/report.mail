@@ -1,0 +1,29 @@
+[% PROCESS report_headers.mail %]
+<body>
+[% IF days.size == 0 %]
+  <p><b>[% i18n('No message blocked') %][% IF report_last_day %] [% i18n('since') %] [% report_last_day %][% END %].</b></p>
+[% ELSE %]
+<table border="0" cellpadding="0" cellspacing="1" style="border: 1px solid #000;">
+  <tr><td colspan="8" style="background: #A3342B; color: #fff; font-weight: bold; padding: 2px 3px;">[% i18n('Rejected messages for') %] [% username %][% IF report_last_day %]  [% i18n('since') %] [% report_last_day %][% END %]</td></tr>
+  <tr style="background: #ccc;"><th style="color: #fff; font-weight: bold;">[% i18n('time') %]</th><th style="color: #fff; font-weight: bold; padding: 0 3px;">[% i18n('sender') %]</th><th style="color: #fff; font-weight: bold; padding: 0 3px;">[% i18n('filter type') %]</th><th colspan="4" style="color: #fff; font-weight: bold; padding: 0 3px;">actions</th></tr>
+[% FOREACH day = days %]
+  <!--<tr class="rowOdd"><th>&nbsp;</th><th>[% i18n('time') %]</th><th>[% i18n('sender') %]</th><th>[% i18n('filter type') %]</th><th>[% i18n('reinject') %]</th><th>[% i18n('whitelist') %]</th><th>[% i18n('blacklist') %]</th><th>faux positif</th></tr>-->
+  <tr><td style="background-color: #fff; color: #777; font-weight: bold; text-align: center;" colspan="8">[% day %]</td></tr>
+  [% FOREACH msg = msgs.$day %]
+    <tr style="[% IF strip(loop.count) == 'Odd' %]background: #ccc;[% ELSE %]background: #eee;[% END %]">
+      <td style="padding: 0 3px;">[% msg.logtime %]</td>
+      <td style="padding: 0 3px;">[% msg.from_addr %]</td>
+      <td style="padding: 0 3px;">[% msg.filter_type %]</td>
+      <td style="padding: 0 3px;">[% IF msg.action_view_url %]<a href="[% site_url %][% cgibin_path %]/external.cgi/[% msg.action_view_url %]">[% i18n('view') %]</a>[% ELSE %]&nbsp;[% END %]</td>
+      <td style="padding: 0 3px;">[% IF msg.action_reinject_url %]<a href="[% site_url %][% cgibin_path %]/external.cgi/[% msg.action_reinject_url %]">[% i18n('receive') %]</a>[% ELSE %]&nbsp;[% END %]</td>
+      <td style="padding: 0 3px;">[% IF msg.action_whitelist_url %]<a href="[% site_url %][% cgibin_path %]/external.cgi/[% msg.action_whitelist_url %]">[% i18n('whitelist') %]</a>[% ELSE %]&nbsp;[% END %]</td>
+      <td style="padding: 0 3px;">[% IF msg.action_blacklist_url %]<a href="[% site_url %][% cgibin_path %]/external.cgi/[% msg.action_blacklist_url %]">[% i18n('blacklist') %]</a>[% ELSE %]&nbsp;[% END %]</td>
+    </tr>
+  [% END %]
+[% END %]
+[% END %]
+</table>
+
+<p>[% i18n('Login to') %] <a href="[% site_url %][% cgibin_path %]/login.cgi">Spamity</a></p>
+</body>
+</html>

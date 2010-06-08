@@ -1,3 +1,5 @@
+-- Definition of SQL tables for PostgreSQL database server.
+
 -- spamity
 
 create table spamity (
@@ -18,3 +20,13 @@ create table spamity (
 
 create index spamity_logdate_index on spamity (logdate);
 create index spamity_username_index on spamity (username);
+
+-- spamity_preferences
+
+create table spamity_prefs (
+  username varchar(64),
+  lang varchar(16) default 'en_US',
+  report_freq_day smallint default 7,
+  report_last_day date, -- 1 day-resolution
+  primary key (username)
+);

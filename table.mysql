@@ -1,3 +1,5 @@
+-- Definition of SQL tables for MySQL database server.
+
 -- spamity
 
 create table spamity (
@@ -16,4 +18,15 @@ create table spamity (
   primary key (id),
   index (logdate),
   index (username)
+);
+
+-- spamity_preferences
+
+create table spamity_prefs (
+  username varchar(64),
+  lang varchar(16) default 'en_US',
+  report_freq_day smallint default 7,
+  report_last_day date, -- 1 day-resolution
+  email varchar(128),
+  primary key (username)
 );

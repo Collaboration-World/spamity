@@ -1,43 +1,43 @@
 [% IF username %]
 <h2><a name="statistics"></a>[% i18n('statistics') %]</h2>
 <ul>
-  <li><strong>[% i18n('summary') %]</strong> - Aperçu graphique présenté par <a href="#filtertypes">type de filtre</a> des messages bloqués [% IF NOT admin %]pour votre ou vos adresses courriel [% END %]et connus par le système. Les [% IF admin %]20[% ELSE %]10[% END %] derniers messages rejetés sont aussi présentés.</li>
-  <li><strong>[% i18n('last 24 hours') %]</strong> - Graphique du nombre de messages rejetés au courant des 24 dernières heures[% IF NOT admin %] pour votre ou vos adresses courriel[% END %].</li>
-  <li><strong>[% i18n('last week') %]</strong> - Graphique du nombre de messages rejetés au courant de la dernière semaine[% IF NOT admin %] pour votre ou vos adresses courriel[% END %].</li>
-  <li><strong>[% i18n('last month') %]</strong> - Graphique du nombre de messages rejetés au courant du dernier mois[% IF NOT admin %] pour votre ou vos adresses courriel[% END %].</li>
-  [% IF admin %]<li><strong>(top 20)</strong> - Affiche les 20 adresses les plus pollupostées pour la période.</li>[% END %]
+  <li><strong>[% i18n('summary') %]</strong> - AperÃ§u graphique prÃ©sentÃ© par <a href="#filtertypes">type de filtre</a> des messages bloquÃ©s [% IF NOT admin %]pour votre ou vos adresses courriel [% END %]et connus par le systÃ¨me. Les [% IF admin %]20[% ELSE %]10[% END %] derniers messages rejetÃ©s sont aussi prÃ©sentÃ©s.</li>
+  <li><strong>[% i18n('last 24 hours') %]</strong> - Graphique du nombre de messages rejetÃ©s au courant des 24 derniÃ¨res heures[% IF NOT admin %] pour votre ou vos adresses courriel[% END %].</li>
+  <li><strong>[% i18n('last week') %]</strong> - Graphique du nombre de messages rejetÃ©s au courant de la derniÃ¨re semaine[% IF NOT admin %] pour votre ou vos adresses courriel[% END %].</li>
+  <li><strong>[% i18n('last month') %]</strong> - Graphique du nombre de messages rejetÃ©s au courant du dernier mois[% IF NOT admin %] pour votre ou vos adresses courriel[% END %].</li>
+  [% IF admin %]<li><strong>(top 20)</strong> - Affiche les 20 adresses les plus pollupostÃ©es pour la pÃ©riode.</li>[% END %]
 </ul>
 <h2><a name="search"></a>[% i18n('search') %]</h2>
 <ul>
-  <li>Exécute une recherche parmi les messages rejetés [% IF NOT admin %]pour votre ou vos adresses courriel[% END %]selon différents critères.</li>
-  <li>Pour rechercher les messages d'un domaine précis, spécifiez ce domaine dans le champs <i>[% i18n('email/domain') %]</i>, sans l'arobas (<i>@</i>) (exemple: <i>domaine.tld</i>).</li>
-  <li>Selon l'installation, une partie ou l'ensemble des messages rejetés sont placés en quarantaine. L'icône d'une enveloppe (<img src="[% htdocs_path %]/images/rawsource.gif" width="14" height="10" alt="rawsource"/>) apparaît à gauche des messages retenus en quarantaine. Vous pouvez voir un message en quarantaine en cliquant sur l'icône et éventuellement le ré-injecter dans votre compte si vous jugez le message légitime.</li>
-<li>Les résultats sont groupés par adresse courriel, chronologiquement.[% IF admin %] Entant qu'administrateur, vous pouvez aussi afficher les résultats par date, en commançant par le plus récent.[% END %]</li>
+  <li>ExÃ©cute une recherche parmi les messages rejetÃ©s [% IF NOT admin %]pour votre ou vos adresses courriel[% END %]selon diffÃ©rents critÃ¨res.</li>
+  <li>Pour rechercher les messages d'un domaine prÃ©cis, spÃ©cifiez ce domaine dans le champs <i>[% i18n('email/domain') %]</i>, sans l'arobas (<i>@</i>) (exemple: <i>domaine.tld</i>).</li>
+  <li>Selon l'installation, une partie ou l'ensemble des messages rejetÃ©s sont placÃ©s en quarantaine. L'icÃ´ne d'une enveloppe (<img src="[% htdocs_path %]/images/rawsource.gif" width="14" height="10" alt="rawsource"/>) apparaÃ®t Ã  gauche des messages retenus en quarantaine. Vous pouvez voir un message en quarantaine en cliquant sur l'icÃ´ne et Ã©ventuellement le rÃ©-injecter dans votre compte si vous jugez le message lÃ©gitime.</li>
+<li>Les rÃ©sultats sont groupÃ©s par adresse courriel, chronologiquement.[% IF admin %] Entant qu'administrateur, vous pouvez aussi afficher les rÃ©sultats par date, en commanÃ§ant par le plus rÃ©cent.[% END %]</li>
 </ul>
 [% IF amavisdnew %]<h2><a name="preferences"></a>[% i18n('preferences') %]</h2>
 <ul>
-  <li>Configurez la politique de filtrage pour votre ou vos adresses courriel. La politique par <i>default</i> est définie par l'administrateur du système. Des politiques prédéfinies additionnelles peuvent être aussi disponibles. Sélectionnez <i>[% i18n('customized') %]</i> si vous désirez modifier chacun des paramètres.</li>
-  <li><strong>[% i18n('tolerence') %]</strong> - Certaines méthodes de filtrage peuvent être désactivées. Lorsqu'une méthode est désactivée, il est possible de spécifier une extension courriel (par exemple, spécifier <i>pourriel</i> comme extension courriel change l'adresse du destinataire <i>nom@domaine.tld</i> par <i>nom+pourriel@domaine.tld</i> lorsque le filtre s'applique au message).</li>
-  <li><strong>[% i18n('spam levels') %]</strong> - À chaque message est attribué un niveau de pourriel. Trois (3) valeurs engagent des actions distinctes (étiquetage et/ou destruction). Lorsqu'un message est étiqueté, son sujet peut aussi être précédé d'un préfix.</li>
-  <li><strong>[% i18n('lists') %]</strong> - Lorsque vous utilisez un politque prédéfinie ou une politique personnalisée, vous pouvez forcer le rejet ou l'acceptation d'adresses (<i>nom@domaine.tld</i>), de domaines (<i>@domaine.tld</i>), ou de noms (<i>nom</i>).
+  <li>Configurez la politique de filtrage pour votre ou vos adresses courriel. La politique par <i>default</i> est dÃ©finie par l'administrateur du systÃ¨me. Des politiques prÃ©dÃ©finies additionnelles peuvent Ãªtre aussi disponibles. SÃ©lectionnez <i>[% i18n('customized') %]</i> si vous dÃ©sirez modifier chacun des paramÃ¨tres.</li>
+  <li><strong>[% i18n('tolerence') %]</strong> - Certaines mÃ©thodes de filtrage peuvent Ãªtre dÃ©sactivÃ©es. Lorsqu'une mÃ©thode est dÃ©sactivÃ©e, il est possible de spÃ©cifier une extension courriel (par exemple, spÃ©cifier <i>pourriel</i> comme extension courriel change l'adresse du destinataire <i>nom@domaine.tld</i> par <i>nom+pourriel@domaine.tld</i> lorsque le filtre s'applique au message).</li>
+  <li><strong>[% i18n('spam levels') %]</strong> - Ã€ chaque message est attribuÃ© un niveau de pourriel. Trois (3) valeurs engagent des actions distinctes (Ã©tiquetage et/ou destruction). Lorsqu'un message est Ã©tiquetÃ©, son sujet peut aussi Ãªtre prÃ©cÃ©dÃ© d'un prÃ©fix.</li>
+  <li><strong>[% i18n('lists') %]</strong> - Lorsque vous utilisez un politque prÃ©dÃ©finie ou une politique personnalisÃ©e, vous pouvez forcer le rejet ou l'acceptation d'adresses (<i>nom@domaine.tld</i>), de domaines (<i>@domaine.tld</i>), ou de noms (<i>nom</i>).
 </ul>[% END %]
 <h2><a name="filtertypes"></a>[% i18n('appendix: filter types') %]</h2>
 <ul>
-  <li><strong>rbl</strong> - Message rejeté par une liste <i>Realtime Blackhole List</i></li>
-  <li><strong>rhsbl client</strong> - Message rejeté par une liste <i>Right Hand Side Block List</i></li>
+  <li><strong>rbl</strong> - Message rejetÃ© par une liste <i>Realtime Blackhole List</i></li>
+  <li><strong>rhsbl client</strong> - Message rejetÃ© par une liste <i>Right Hand Side Block List</i></li>
   <li><strong>header date</strong> - La date du message n'est pas valide.</i></li>
-  <li><strong>header suject</strong> - Message rejeté pour cause d'un sujet suspect.</li>
-  <li><strong>header x-mailer</strong> - Message rejeté pour cause d'un logiciel d'expédition suspect.</li>
-  <li><strong>header content-disposition</strong> - Message rejeté pour cause d'un fichier attaché suspect.</li>
-  <li><strong>header content-type</strong> - Message rejeté pour cause d'un fichier attaché suspect.</li>
-  <li><strong>body</strong> - Message rejeté pour cause d'un contenu suspect.</li>
-  <li><strong>access username</strong> - Message rejeté pour cause d'un nom d'expéditeur suspect.</li>
-  <li><strong>virus</strong> - Message rejeté par le logiciel d'anti-virus.</li>
-  <li><strong>spam</strong> - Message considéré un pourriel par <a href="http://www.spamassassin.org/">SpamAssassin</a>.</li>
-  <li><strong>banned</strong> - Message rejeté pour cause d'un fichier attaché prohibé.</li>
-  <li><strong>helo</strong> - Message rejeté pour cause d'une commande <i>HELO</i> manquante ou inacceptable.</li>
+  <li><strong>header suject</strong> - Message rejetÃ© pour cause d'un sujet suspect.</li>
+  <li><strong>header x-mailer</strong> - Message rejetÃ© pour cause d'un logiciel d'expÃ©dition suspect.</li>
+  <li><strong>header content-disposition</strong> - Message rejetÃ© pour cause d'un fichier attachÃ© suspect.</li>
+  <li><strong>header content-type</strong> - Message rejetÃ© pour cause d'un fichier attachÃ© suspect.</li>
+  <li><strong>body</strong> - Message rejetÃ© pour cause d'un contenu suspect.</li>
+  <li><strong>access username</strong> - Message rejetÃ© pour cause d'un nom d'expÃ©diteur suspect.</li>
+  <li><strong>virus</strong> - Message rejetÃ© par le logiciel d'anti-virus.</li>
+  <li><strong>spam</strong> - Message considÃ©rÃ© un pourriel par <a href="http://www.spamassassin.org/">SpamAssassin</a>.</li>
+  <li><strong>banned</strong> - Message rejetÃ© pour cause d'un fichier attachÃ© prohibÃ©.</li>
+  <li><strong>helo</strong> - Message rejetÃ© pour cause d'une commande <i>HELO</i> manquante ou inacceptable.</li>
 </ul>
 [% ELSE %]
-<p>Ceci est votre gestionnaire des messages bloqués pour votre ou vos adresses courriel.</p>
-<p>Authentifiez-vous afin de consulter les derniers messages rejetés par le système.</p>
+<p>Ceci est votre gestionnaire des messages bloquÃ©s pour votre ou vos adresses courriel.</p>
+<p>Authentifiez-vous afin de consulter les derniers messages rejetÃ©s par le systÃ¨me.</p>
 [% END %]

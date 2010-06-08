@@ -1,10 +1,10 @@
 #!/usr/bin/perl
+# -*- Mode: CPerl tab-width: 4; c-label-minimum-indentation: 4; indent-tabs-mode: nil; c-basic-offset: 4; cperl-indent-level: 4 -*-
 #
 #  $Source: /opt/cvsroot/projects/Spamity/sbin/spamityd,v $
 #  $Name:  $
 #
-#  Copyright (c) 2003-2009
-#
+#  Copyright (c) 2003-2010
 #  Author: Francis Lachapelle <francis@Sophos.ca>
 #
 #  This program is free software; you can redistribute it and/or modify
@@ -17,12 +17,6 @@
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #  GNU General Public License for more details
 #
-
-# Uncomment and modify the following line if you installed Spamity's Perl modules
-# and/or dependent modules in some non-standard directory.
-#
-# use lib '/opt/spamity/lib';
-use lib '/home/francis/Source/Spamity.tmp/lib';
 
 #*********************************************************************
 # Load initial Perl modules
@@ -350,7 +344,7 @@ foreach $path (@PATHS) {
 # Filter type : spam (via amavisd-new)
 # Filter id   : SpamAssassin
 #*********************************************************************
-	    elsif (m/^($date) (.*)$hostname amavis.* (?:Blocked SPAM)?(?:Not-Delivered)?, .*<(?:(.*?)@)?(.*?)> -> ((?:<(?:.*?@)?.*?>,?)+).*? ((?:quarantine:? (spam-.*?)(?:\.gz)?, )?(?:Resent-)?(?:Message-ID|mail_id): .*, Hits: (.*?)(?:, .*)?)$/) {
+	    elsif (m/^($date) (.*)$hostname amavis.* (?:Blocked SPAM)?(?:Not-Delivered)?, .*<(?:(.*?)@)?(.*?)> -> ((?:<(?:.*?@)?.*?>,?)+).*? ((?:quarantine:? (\S+?)(?:\.gz)?, )?(?:Resent-)?(?:Message-ID|mail_id): .*, Hits: (.*?)(?:, .*)?)$/) {
 		($spam_date, $from_user, $from_host, $filter_type, $filter_id, $description, $rawsource) =
 		    (&buildDate($year,$1,$2), $3, $4, 'spam', "SpamAssassin (Score: $8)", $6, $7);
 		@to = &parseAddresses($5);
@@ -387,122 +381,125 @@ foreach $path (@PATHS) {
 # Unknown rejected entry; inform the developer!
 #*********************************************************************
 	    elsif (m/^($date) (.*)$hostname.* (reject:|discard:|SPAM|Not-Delivered|INFECTED)/) {
-		if (! m/(User unknown|Relay access denied|VIRUS|BANNED)/) {
-		    chomp;
-		    if ($debug) {
-			print &Spamity::logPrefix,"???: $_\n";
-		    } elsif (&Spamity::conf('log_level') > 1) {
-			warn "[DEBUG] Unknown rejected entry: $_\n";
-		    }
-		}
+            if (! m/(User unknown|Relay access denied|VIRUS|BANNED)/) {
+                chomp;
+                if ($debug) {
+                    print &Spamity::logPrefix,"???: $_\n";
+                } elsif (&Spamity::conf('log_level') > 1) {
+                    warn "[DEBUG] Unknown rejected entry: $_\n";
+                }
+            }
 	    }
 #*********************************************************************
 # Execute the sql statement or print details if in debug mode
 #*********************************************************************
 	    $spam_date = &Date::Manip::ParseDate($spam_date);
 	    if (defined $spam_date) {
-		$spam_date = &Date::Manip::UnixDate($spam_date, "%Y-%m-%d %H:%M:%S");
-		if ($from_user && $from_host && $domains{lc($from_host)}) {
-		    push(@from_usernames, &Spamity::Lookup::getUsersByAddress("$from_user\@$from_host"));
-		}
-		if (defined $rawsource) {
-		    undef $/;
-		    if (-f &Spamity::conf('quarantine_path')."/$rawsource") {
-			open(SOURCE, &Spamity::conf('quarantine_path')."/$rawsource");
-			binmode(SOURCE);
-			$rawsource = <SOURCE>;
-			close(SOURCE);
-		    }
-		    elsif (-f &Spamity::conf('quarantine_path')."/$rawsource.gz") {
-			undef $/;
-			open(GZSOURCE, &Spamity::conf('quarantine_path')."/$rawsource.gz");
-			binmode(GZSOURCE);
-			$gzsource = <GZSOURCE>;
-			$rawsource = &Compress::Zlib::memGunzip($gzsource);
-			close(GZSOURCE);
-		    }
-		    else {
-			$rawsource = undef;
-		    }
-		    $/ = "\n";
-		}
-		foreach (@to) {
-		    @usernames = ();
-
-		    if (m/(?:(.*?)@)?(.*?)$/) {
-			($to_user, $to_host) = ($1, $2);
-			push(@usernames, &Spamity::Lookup::getUsersByAddress("$to_user\@$to_host")) if ($domains{lc($to_host)});
-		    }
-		    push(@usernames, @from_usernames);
-
-		    if ($#usernames < 0) { push(@usernames, &Spamity::conf('unknown_recipient')); }
-		    if ($debug) {
-			print &Spamity::logPrefix,"$spam_date $filter_type ($filter_id), from $from_user\@$from_host to $to_user\@$to_host (", join(", ", @usernames), ")\n";
-		    }
-		    else {
-			foreach $username (@usernames) {
-			    $userkey = &Spamity::userKey($username);
-			    $key = $userkey || 'default';
-			    do {
-				if (&Spamity::conf('max_statements_reuse', 1) && $count_sth{$key} &&
-				    ($count_sth{$key} % &Spamity::conf('max_statements_reuse')) == 0) {
-				    # The maximum number of prepared statements executions is reached.
-				    # Flush the prepared statements and disconnect/reconnect to the database.
-				    &reconnect();
-				    next;
-				}
-				&prepareStatement($userkey, $key);
-				if ($count_sth{$key}) {
-				    $count_sth{$key}++;
-				}
-				else {
-				    $count_sth{$key} = 1;
-				}
-
-				unless ($select_sth{$key} &&
-					$select_sth{$key}->bind_param(1, $spam_date) &&
-					$select_sth{$key}->bind_param(2, $username) &&
-					$select_sth{$key}->bind_param(3, lc(substr($to_user,0,64)) || '_') &&
-					$select_sth{$key}->bind_param(4, lc(substr($to_host,0,64)) || '_') &&
-					$select_sth{$key}->bind_param(5, lc(substr($from_user,0,64)) || '_') &&
-					$select_sth{$key}->bind_param(6, lc(substr($from_host,0,64)) || '_') &&
-					$select_sth{$key}->bind_param(7, $filter_type) &&
-					$select_sth{$key}->bind_param(8, substr($filter_id,0,64))) {
-				    warn &Spamity::logPrefix,"Select statement binding error: ",$DBI::errstr,"\n";
-				    &reconnect();
-				    next;
-				}
-				
-				if ($select_sth{$key} && $select_sth{$key}->execute()) {
-				    if ($select_sth{$key}->fetchrow_arrayref) {
-					warn "[DEBUG SQL] $spam_date Entry exist; don't insert data ($key)\n" if (int(&Spamity::conf('log_level')) > 0);
-					$select_sth{$key}->finish;
-					last;
-				    }
-				}
-				else {
-				    warn &Spamity::logPrefix,"Select statement execution error: ",$select_sth{$key}->errstr,"\n";
-				    &reconnect();
-				    next;
-				}
-				
-				unless ($insert_sth{$key} &&
-					$insert_sth{$key}->bind_param(1, $spam_date) &&
-					$insert_sth{$key}->bind_param(2, $username) &&
-					$insert_sth{$key}->bind_param(3, $hostname) &&
-					$insert_sth{$key}->bind_param(4, lc(substr($to_user,0,64)) || '_') &&
-					$insert_sth{$key}->bind_param(5, lc(substr($to_host,0,64)) || '_') &&
-					$insert_sth{$key}->bind_param(6, lc(substr($from_user,0,64)) || '_') &&
-					$insert_sth{$key}->bind_param(7, lc(substr($from_host,0,64)) || '_') &&
-					$insert_sth{$key}->bind_param(8, $filter_type) &&
-					$insert_sth{$key}->bind_param(9, substr($filter_id,0,64)) &&
-					$insert_sth{$key}->bind_param(10, $description) &&
-					$insert_sth{$key}->bind_param(11, $rawsource, $db->BLOB_ATTR)) {
-				    warn &Spamity::logPrefix, "Select statement binding error: ",$DBI::errstr;
-				    &reconnect();
-				    next;
-				}
-
+            $spam_date = &Date::Manip::UnixDate($spam_date, "%Y-%m-%d %H:%M:%S");
+            if ($from_user && $from_host && $domains{lc($from_host)}) {
+                push(@from_usernames, &Spamity::Lookup::getUsersByAddress("$from_user\@$from_host"));
+            }
+            if (defined $rawsource) {
+                undef $/;
+                if (-f &Spamity::conf('quarantine_path')."/$rawsource") {
+                    warn "[DEBUG] Found quarantined message ",&Spamity::conf('quarantine_path')."/$rawsource\n" if ($debug);
+                    open(SOURCE, &Spamity::conf('quarantine_path')."/$rawsource");
+                    binmode(SOURCE);
+                    $rawsource = <SOURCE>;
+                    close(SOURCE);
+                }
+                elsif (-f &Spamity::conf('quarantine_path')."/$rawsource.gz") {
+                    warn "[DEBUG] Found quarantined message ",&Spamity::conf('quarantine_path')."/$rawsource.gz\n" if ($debug);
+                    undef $/;
+                    open(GZSOURCE, &Spamity::conf('quarantine_path')."/$rawsource.gz");
+                    binmode(GZSOURCE);
+                    $gzsource = <GZSOURCE>;
+                    $rawsource = &Compress::Zlib::memGunzip($gzsource);
+                    close(GZSOURCE);
+                }
+                else {
+                    $rawsource = undef;
+                    warn &Spamity::logPrefix,"[WARNING] Can't locate quarantined message ",&Spamity::conf('quarantine_path')."/$rawsource(.gz)\n";
+                }
+                $/ = "\n";
+            }
+            foreach (@to) {
+                @usernames = ();
+                
+                if (m/(?:(.*?)@)?(.*?)$/) {
+                    ($to_user, $to_host) = ($1, $2);
+                    push(@usernames, &Spamity::Lookup::getUsersByAddress("$to_user\@$to_host")) if ($domains{lc($to_host)});
+                }
+                push(@usernames, @from_usernames);
+                
+                if ($#usernames < 0) { push(@usernames, &Spamity::conf('unknown_recipient')); }
+                if ($debug) {
+                    print &Spamity::logPrefix,"$spam_date $filter_type ($filter_id), from $from_user\@$from_host to $to_user\@$to_host (", join(", ", @usernames), ")\n";
+                }
+                else {
+                    foreach $username (@usernames) {
+                        $userkey = &Spamity::userKey($username);
+                        $key = $userkey || 'default';
+                        do {
+                            if (&Spamity::conf('max_statements_reuse', 1) && $count_sth{$key} &&
+                                ($count_sth{$key} % &Spamity::conf('max_statements_reuse')) == 0) {
+                                # The maximum number of prepared statements executions is reached.
+                                # Flush the prepared statements and disconnect/reconnect to the database.
+                                &reconnect();
+                                next;
+                            }
+                            &prepareStatement($userkey, $key);
+                            if ($count_sth{$key}) {
+                                $count_sth{$key}++;
+                            }
+                            else {
+                                $count_sth{$key} = 1;
+                            }
+                            
+                            unless ($select_sth{$key} &&
+                                    $select_sth{$key}->bind_param(1, $spam_date) &&
+                                    $select_sth{$key}->bind_param(2, $username) &&
+                                    $select_sth{$key}->bind_param(3, lc(substr($to_user,0,64)) || '_') &&
+                                    $select_sth{$key}->bind_param(4, lc(substr($to_host,0,64)) || '_') &&
+                                    $select_sth{$key}->bind_param(5, lc(substr($from_user,0,64)) || '_') &&
+                                    $select_sth{$key}->bind_param(6, lc(substr($from_host,0,64)) || '_') &&
+                                    $select_sth{$key}->bind_param(7, $filter_type) &&
+                                    $select_sth{$key}->bind_param(8, substr($filter_id,0,64))) {
+                                warn &Spamity::logPrefix,"Select statement binding error: ",$DBI::errstr,"\n";
+                                &reconnect();
+                                next;
+                            }
+                            
+                            if ($select_sth{$key} && $select_sth{$key}->execute()) {
+                                if ($select_sth{$key}->fetchrow_arrayref) {
+                                    warn "[DEBUG SQL] $spam_date Entry exist; don't insert data ($key)\n" if (int(&Spamity::conf('log_level')) > 0);
+                                    $select_sth{$key}->finish;
+                                    last;
+                                }
+                            }
+                            else {
+                                warn &Spamity::logPrefix,"Select statement execution error: ",$select_sth{$key}->errstr,"\n";
+                                &reconnect();
+                                next;
+                            }
+                            
+                            unless ($insert_sth{$key} &&
+                                    $insert_sth{$key}->bind_param(1, $spam_date) &&
+                                    $insert_sth{$key}->bind_param(2, $username) &&
+                                    $insert_sth{$key}->bind_param(3, $hostname) &&
+                                    $insert_sth{$key}->bind_param(4, lc(substr($to_user,0,64)) || '_') &&
+                                    $insert_sth{$key}->bind_param(5, lc(substr($to_host,0,64)) || '_') &&
+                                    $insert_sth{$key}->bind_param(6, lc(substr($from_user,0,64)) || '_') &&
+                                    $insert_sth{$key}->bind_param(7, lc(substr($from_host,0,64)) || '_') &&
+                                    $insert_sth{$key}->bind_param(8, $filter_type) &&
+                                    $insert_sth{$key}->bind_param(9, substr($filter_id,0,64)) &&
+                                    $insert_sth{$key}->bind_param(10, $description) &&
+                                    $insert_sth{$key}->bind_param(11, $rawsource, $db->BLOB_ATTR)) {
+                                warn &Spamity::logPrefix, "Select statement binding error: ",$DBI::errstr;
+                                &reconnect();
+                                next;
+                            }
+                            
 				if ($insert_sth{$key} && $insert_sth{$key}->execute()) {
 				    warn "[DEBUG SQL] insert in table ".sprintf('%7s', $key)." ($spam_date, $username)\n" if (int(&Spamity::conf('log_level')) > 0);
 				    last;

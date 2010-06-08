@@ -79,7 +79,8 @@ use vars qw(@ISA %Lexicon);
 
 	    # prefs.cgi
 	    'Preferences saved for address' => 'Preferences saved for address',
-	    
+	    'Your preferences were saved' => 'Your preferences were saved',
+
 	    # prefs.html
 	    'preferences' => 'preferences',
 	    'Other email' => 'Other email',
@@ -110,6 +111,15 @@ use vars qw(@ISA %Lexicon);
 	    'Cancel' => 'Cancel',
 	    'Save' => 'Save',
 	    
+	    # prefs_spamity.html
+	    'reports' => 'reports',
+	    'Receive reports on blocked messages for your account' => 'Receive reports on blocked messages for your account',
+	    'frequency' => 'frequency',
+	    'email' => 'email',
+	    'Daily' => 'Daily',
+	    'Weekly' => 'Weekly',
+	    'Monthly' => 'Monthly',
+
 	    # rawsource.cgi
 	    'You are about to reinject a virus to your account. Do you want to continue?' => 'You are about to reinject a virus to your account. Do you want to continue?',
 	    'Reinjecting currently not possible.' => 'Reinjecting currently not possible.',
@@ -138,6 +148,35 @@ use vars qw(@ISA %Lexicon);
             # footer.html
 	    'by' => 'by',
 	    
+	    # report_headers.mail
+
+	    # report.mail
+	    'No message blocked' => 'No message blocked',
+	    'view' => 'view',
+	    'receive' => 'receive',
+	    'Login to' => 'Login to',
+
+	    # external.cgi
+	    'view a rejected message' => 'view a rejected message',
+	    'receive a rejected message' => 'receive a rejected message',
+	    'report a rejected message as a false positive' => 'report a rejected message as a false positive',
+	    'The recipient address %s is not associated to your account.' => 'The recipient address %s is not associated to your account.',
+	    'The domain %s is already whitelisted.' => 'The domain %s is already whitelisted.',
+	    'The address %s is already whitelisted.' => 'The address %s is already whitelisted.',
+	    'The domain %s is already blacklisted.' => 'The domain %s is already blacklisted.',
+	    'The address %s is already blacklisted.' => 'The address %s is already blacklisted.',
+
+	    # external.html
+	    'The message from' => 'The message from',
+	    'was successfully sent to' => 'was successfully sent to',
+	    'The entry' => 'The entry',
+	    'has been added to the' => 'has been added to the',
+	    'of' => 'of',
+	    'Add' => 'Add',
+	    'Add to' => 'Add to',
+	    'Choose which part of the email address you want to' => 'Choose which part of the email address you want to',
+	    'only applicable to local domains' =>  'only applicable to local domains',
+
 	    '_AUTO' => 1,
 	    );
 

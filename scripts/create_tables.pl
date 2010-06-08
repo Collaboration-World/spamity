@@ -1,10 +1,7 @@
 #!/usr/bin/env perl
+# -*- Mode: CPerl tab-width: 4; c-label-minimum-indentation: 4; indent-tabs-mode: nil; c-basic-offset: 4; cperl-indent-level: 4 -*-
 #
-#  $Source: /opt/cvsroot/projects/Spamity/scripts/create_tables.pl,v $
-#  $Name:  $
-#
-#  Copyright (c) 2006, 2007, 2008
-#
+#  Copyright (c) 2006-2010
 #  Author: Francis Lachapelle <francis@Sophos.ca>
 #
 #  This program is free software; you can redistribute it and/or modify
@@ -101,22 +98,22 @@ CREATE
 
 my %predrop;
 $predrop{'oracle'} =
-    [ 'DROP TRIGGER %s_id_trigger' ];
+  [ 'DROP TRIGGER %s_id_trigger' ];
 
 my %postdrop;
 $postdrop{'oracle'} =
-    [ 'DROP SEQUENCE seq_%s_id' ];
+  [ 'DROP SEQUENCE seq_%s_id' ];
 
 my %postcreate;
 $postcreate{'pgsql'} =
-    [ 'CREATE INDEX %s_logdate_index ON %s (logdate)',
-      'CREATE INDEX %s_username_index ON %s (username)' ];
+  [ 'CREATE INDEX %s_logdate_index ON %s (logdate)',
+    'CREATE INDEX %s_username_index ON %s (username)' ];
 $postcreate{'oracle'} =
-    [ 'CREATE SEQUENCE seq_%s_id
+  [ 'CREATE SEQUENCE seq_%s_id
         START WITH 1
         INCREMENT BY 1
         NOMAXVALUE',
-      'CREATE TRIGGER %s_id_trigger
+    'CREATE TRIGGER %s_id_trigger
         BEFORE INSERT ON %s
         FOR EACH ROW
         BEGIN
@@ -168,11 +165,11 @@ foreach $i (@table_suffixes) {
                     warn $db->dbh->errstr unless $db->dbh->do($stmt);
                 }
             }
-        }
-        else {
+        } else {
             print "Table $tablename already exists; skipping\n";
             $create = 0;
         }
+        $sth->finish();
     }
 
     if ($create) {
@@ -204,6 +201,7 @@ if ($sth->execute()) {
         print "Username of email address too long for user \"",$row->{username},"\" (",$row->{email},")\n";
     }
 }
+$sth->finish();
 die "Can't truncate fields\n" if ($too_long);
 
 # Populate the tables
@@ -234,8 +232,7 @@ if ($sth->execute()) {
         if ($username eq &conf('unknown_recipient')) {
             # Expect a lot of entries; place unknown recipient spam in its own table.
             $bucket = 'unknown';
-        }
-        else {
+        } else {
             # Compute the user hask key
             $bucket = &userKey($username);
         }
@@ -245,12 +242,12 @@ if ($sth->execute()) {
         if ($sth_count->execute($username)) {
             $cur_count = $sth_count->fetchrow_arrayref;
             if ($$cur_count[0] == $count) {
-#               print $username," => already migrated (",$count,")\n";
+                #               print $username," => already migrated (",$count,")\n";
                 print ",";
                 next;
             }
         }
-#       print $username," => $bucket\n";
+        #       print $username," => $bucket\n";
         print ".";
 
         # Peform the SQL insertion
@@ -270,6 +267,7 @@ foreach $i (@table_suffixes) {
         $total += $$count[0];
         print "spamity_$i\t",$$count[0],"\n";
     }
+    $sth->finish();
 }
 print "\nTotal: $total rows migrated.\n";
 $sth = $db->dbh->prepare("SELECT count(*) FROM spamity");
@@ -279,6 +277,7 @@ if ($sth->execute()) {
         die "Inconsistent number of rows: $total rows in new tables, ",$$count[0]," rows in spamity table.\n";
     }
 }
+$sth->finish();
 
 print "You may now delete table 'spamity'\n";
 

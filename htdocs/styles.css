@@ -260,6 +260,10 @@ div.button a {
   width: 10em;
 }
 
+select.auto {
+  width: auto;
+}
+
 #form div.radio input { 
   margin-left: 12em;
   width: auto;
@@ -311,7 +315,9 @@ div#data table {
   width: 100%;
 }
 div#data th,
-div#data td  {
+div#data td,
+table#headers th,
+table#headers td  {
   font-size: 85%;
   padding: 2px;
 }
@@ -381,7 +387,10 @@ div#rawsource table#headers td {
   padding-right: 0.25em;
   text-align: left;
 }
-
+div#rawsource table#headers th {
+  width: 120px;
+  vertical-align: top;
+}
 div#rawsource div#message {
   border: 1px solid rgb(246,232,196);  /* #F6E8C4 */
   background: #A3342B;
@@ -392,9 +401,12 @@ div#rawsource div#message {
 div#rawsource pre {
   font-size: 85%;
   font-family: monaco, courier, monospace;
-  margin: 0px;
+  margin: 2px;
+  padding: 3px;
   overflow: auto;
   text-align: left;
+  background: #eee;
+  border: 1px solid #ccc;
 }
 div#rawsource div#form {
   padding-top: 1em;

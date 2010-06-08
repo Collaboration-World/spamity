@@ -1,10 +1,7 @@
 #!/usr/bin/perl
+# -*- Mode: CPerl tab-width: 4; c-label-minimum-indentation: 4; indent-tabs-mode: nil; c-basic-offset: 4; cperl-indent-level: 4 -*-
 #
-#  $Source: /opt/cvsroot/projects/Spamity/cgi-bin/login.cgi,v $
-#  $Name:  $
-#
-#  Copyright (c) 2003, 2004, 2005, 2006, 2007
-#
+#  Copyright (c) 2003-2010
 #  Author: Francis Lachapelle <francis@Sophos.ca>
 #
 #  This program is free software; you can redistribute it and/or modify
@@ -17,11 +14,6 @@
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #  GNU General Public License for more details
 #
-
-# Uncomment and modify the following line if you installed Spamity's Perl module
-# and/or dependent modules in some non-standard directory.
-#
-# use lib "/opt/spamity/lib";
 
 use Spamity qw(conf logPrefix);
 use Spamity::Authentication qw(authenticate);
@@ -72,12 +64,14 @@ if (defined $vars->{sid}) {
 	$cookie = $query->cookie(-name=>'CGISESSID',
 				 -value=>'',
 				 -expires=>'-1s');
+	warn "[DEBUG] Expiring cookie CGISESSID" if (int(&conf('log_level')) > 0);
 	print $query->redirect(-uri => $vars->{url}.'login.cgi',-cookie => $cookie);
 	exit;
     }
     else {
 	# Redirect to start page
 	$cookie = new CGI::Cookie(-name => 'CGISESSID', -value => $session->id);
+	warn "[DEBUG] Valid cookie CGISESSID -- redirecting" if (int(&conf('log_level')) > 0);
 	$vars->{url} .= ((&conf((($session->param('admin') && &conf('admin_start_page', 1))?'admin_':'').
 			'start_page') eq 'stats')?'stats':'search').'.cgi';
     	print $query->redirect(-uri => $vars->{url}, -cookie => $cookie);
@@ -130,6 +124,7 @@ if (defined $vars->{username} && defined $vars->{password}) {
 	$session->flush();
 	
 	# Redirect to start page
+	warn "[DEBUG] Setting cookie CGISESSID (expires in 1 hour) with session id ".$session->id if (int(&conf('log_level')) > 0);
 	my $cookie = new CGI::Cookie(-name => 'CGISESSID', -value => $session->id);
 	$vars->{url} .= ((&conf((($session->param('admin') && &conf('admin_start_page', 1))?'admin_':'').
 			'start_page') eq 'stats')?'stats':'search').'.cgi';
@@ -153,10 +148,10 @@ elsif (defined $query->param('login')) {
 sub print_html {
 # Output html
     if (defined $session) {
-	print $session->header;
+	print $session->header(charset=>'UTF-8');
     }
     else {
-	print $query->header;
+	print $query->header(-charset=>'UTF-8');
     }
     
     if ($tt) {

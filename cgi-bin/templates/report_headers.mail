@@ -1,10 +1,14 @@
+From: Rapport pourriel <[% sender %]>
+To: [% recipient %]
+Subject: [% quotedprint(i18n('Rejected messages for'), username) %]
+Content-Type: text/html; charset=UTF-8
+Content-Transfer-Encoding: 7bit
+
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
  "http://www.w3.org/TR/2000/REC-xhtml1-20000126/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>Spamity[% IF username %]: [% i18n('Rejected messages for') %] [% username %][% END %]</title>
-<link rel="stylesheet" type="text/css" media="screen" href="[% htdocs_path %]/styles.css" />
-[% PROCESS js.html %]
+<title>Spamity - [% i18n('Rejected messages for') %] [% username %]</title>
 </head>

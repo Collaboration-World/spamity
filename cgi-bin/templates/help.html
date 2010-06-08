@@ -16,7 +16,7 @@
 [% IF username %]
         <li><a href="[% cgibin_path %]/stats.cgi">[% i18n('statistics') %]</a></li>
 	<li><a href="[% cgibin_path %]/search.cgi">[% i18n('search') %]</a></li>
-	[% IF amavisdnew %]<li><a href="[% cgibin_path %]/prefs.cgi">[% i18n('preferences') %]</a></li>[% END %]
+	[% IF prefs %]<li><a href="[% cgibin_path %]/prefs.cgi">[% i18n('preferences') %]</a></li>[% END %]
 	<li><span>[% i18n('help') %]</span>
 	  <ul id="secondary">
 	    <li><a href="#statistics">[% i18n('statistics') %]</a></li>

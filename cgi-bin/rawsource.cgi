@@ -1,10 +1,7 @@
 #!/usr/bin/perl -w
+# -*- Mode: CPerl tab-width: 4; c-label-minimum-indentation: 4; indent-tabs-mode: nil; c-basic-offset: 4; cperl-indent-level: 4 -*-
 #
-#  $Source: /opt/cvsroot/projects/Spamity/cgi-bin/rawsource.cgi,v $
-#  $Name:  $
-#
-#  Copyright (c) 2004, 2005, 2006
-#
+#  Copyright (c) 2004-2010
 #  Author: Francis Lachapelle <francis@Sophos.ca>
 #
 #  This program is free software; you can redistribute it and/or modify
@@ -17,11 +14,6 @@
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #  GNU General Public License for more details
 #
-
-# Uncomment and modify the following line if you installed Spamity's Perl module
-# and/or dependent modules in some non-standard directory.
-#
-# use lib "/opt/spamity/lib";
 
 use Spamity qw(conf logPrefix);
 use Spamity::Database;
@@ -47,9 +39,8 @@ $tt = &Spamity::Web::getTemplate();
 # Retrieve parameters from HTTP post
 if ($query->param('id')) {
     $vars->{message_id} = $query->param('id');
-}
-elsif ($query->url(-absolute=>1,-path=>1) =~ m/\.cgi\/+([\d:]+)\/?/) {
-    $vars->{message_id} = lc($1);  
+} elsif ($query->url(-absolute=>1,-path=>1) =~ m/\.cgi\/+([\d:]+)\/?/) {
+    $vars->{message_id} = lc($1);
 }
 
 $vars->{cgibin_path} = &conf('cgibin_path');
@@ -114,17 +105,14 @@ if (defined $virus_id && defined &conf('allow_virus_reinjection')) {
 
 if (defined $query->param('confirm')) {
     $vars->{confirmation} = &translate('You are about to reinject a virus to your account. Do you want to continue?');
-}
-elsif ($vars->{allow_reinjection} && defined $query->param('reinject')) {
+} elsif ($vars->{allow_reinjection} && defined $query->param('reinject')) {
     if (! &Spamity::Quarantine::sendMail($mail_from, $rcpt_to, $mailObj)) {
-	$vars->{error} = &translate('Reinjecting currently not possible.');
+        $vars->{error} = &translate('Reinjecting currently not possible.');
+    } else {
+        # Message was successfully reinjected
+        &close_popup;
     }
-    else {
-	# Message was successfully reinjected
-	&close_popup;
-    }
-}
-else {
+} else {
     $vars->{virus} = $virus_id if (defined $virus_id);
     my $body_arrayref =  $mailObj->body();
     my $body = &CGI::escapeHTML(join("\n", @{$body_arrayref}));
@@ -138,8 +126,8 @@ my @keys = ();
 foreach (@{$header_arrayref}) {
     chomp;
     if ($_ =~ m/^(\S+):\s+(.+)$/s) {
-	$headers{$1} =  &CGI::escapeHTML($2);
-	push(@keys, $1);
+        $headers{$1} =  &CGI::escapeHTML($2);
+        push(@keys, $1);
     }
 }
 $vars->{headers} = \%headers;
@@ -147,14 +135,14 @@ $vars->{keys} = \@keys;
 $vars->{strip} = \&Spamity::Web::strip;
 
 # Output HTML
-print $session->header;
+print $session->header(charset=>'UTF-8');
 $tt->process('rawsource.html', $vars) || warn logPrefix,'rawsource.cgi: ',$tt->error();
 
 
 sub close_popup {
 
     # Use JavaScript to close the window
-    print $query->header;
+    print $query->header(-charset=>'UTF-8');
     $vars->{close_window} = '1';
     $tt->process('rawsource.html', $vars) || warn logPrefix,'rawsource.cgi: ',$tt->error();
     exit;

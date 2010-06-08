@@ -1,0 +1,195 @@
+#!/usr/bin/env perl
+# -*- Mode: CPerl tab-width: 4; c-label-minimum-indentation: 4; indent-tabs-mode: nil; c-basic-offset: 4; cperl-indent-level: 4 -*-
+#
+#  Copyright (c) 2010
+#  Author: Francis Lachapelle <francis@Sophos.ca>
+#
+#  This program is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 2 of the License, or
+#  your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details
+#
+
+use Spamity qw(conf logPrefix);
+use Spamity::Database;
+use Spamity::Web;
+use Spamity::i18n qw(setLanguage translate);
+use Spamity::Quarantine;
+use Spamity::Preference::amavisdnew qw(getPolicy getBlacklist setBlacklist getWhitelist setWhitelist);
+
+use POSIX qw(strftime);
+use Mail::Internet;
+use MIME::Base64 qw(encode_base64);
+use Encode qw(encode decode);
+use MIME::QuotedPrint qw(encode_qp);
+use Crypt::CBC;
+use Crypt::Blowfish;
+
+use constant {
+    DEBUG => 0
+};
+
+my $db;
+my $now;
+my $cipher;
+my $tt;
+my $stmt;
+my $sth;
+my $row;
+my $vars;
+my %msgs;
+
+
+# Establish database connection for Spamity preferences
+die $Spamity::Database::message unless ($db = Spamity::Database->new(database => 'spamity_prefs'));
+
+# Establish database connection for Spamity
+die $Spamity::Database::message unless (Spamity::Database->new(database => 'spamity'));
+
+# Test connection to database of AMaViSd-new
+die $Spamity::Database::message unless (Spamity::Database->new(database => 'amavisd-new'));
+
+# Test if reinjection is possible
+die "Reinjection is not configured." unless (&conf('reinjection_smtp_server'));
+
+# Get current time (before changing locale)
+#$now = strftime("%d-%b-%Y", localtime);
+$now = strftime("%Y-%m-%d", localtime);
+
+$vars->{base64} = sub {
+    my $data = encode_base64(encode("ISO-8859-1",join(" ", @_)));
+    chomp $data;
+    return "=?ISO-8859-1?B?$data?=";
+};
+$vars->{i18n} = \&translate;
+$vars->{strip} = \&Spamity::Web::strip;
+$vars->{quotedprint} = sub {
+    my $data = encode_qp(encode("ISO-8859-1", decode('utf-8', join(" ", @_))));
+    #chomp $data;
+    $data =~ s/=[\r\n]?$//;
+    return "=?ISO-8859-1?Q?$data".'?=';
+};
+#$vars->{allow_reinjection} = 1 if (defined &conf('reinjection_smtp_server', 1));
+$vars->{site_url} = &conf('site_url'); $vars->{site_url} =~ s/\/+$//;
+$vars->{sender} = &conf('report_sender_address').'@'.&conf('master_domain');
+$vars->{cgibin_path} = &conf('cgibin_path');
+$vars->{htdocs_path} = &conf('htdocs_path', 1);
+$vars->{htdocs_path} = '' if ($vars->{htdocs_path} eq '/');
+$vars->{version} = $Spamity::VERSION . '';
+
+#my $allow_reinjection = (defined &conf('reinjection_smtp_server', 1));
+my $allow_virus_reinjection = 0 || (defined &conf('allow_virus_reinjection', 1) && &conf('allow_virus_reinjection') =~ m/true/i);
+
+# Prepare cipher
+$cipher = new Crypt::CBC(&conf('encryption_secret_key'), 'Blowfish');
+
+# Prepare template
+$tt = &Spamity::Web::getTemplate();
+
+# Select users for whom a report must be sent
+if ($db->{_module} eq 'mysql') {
+    $stmt = "SELECT username, email, lang, %s as report_last_date, IF(report_last_day,report_last_day,DATE_SUB(NOW(), INTERVAL report_freq_day DAY)) as report_last_day, report_freq_day FROM spamity_prefs WHERE report_last_day IS NULL OR ADDDATE(report_last_day, INTERVAL report_freq_day DAY) <= NOW()";
+    #$stmt = "SELECT username, email, lang, %s as report_last_date, IF(report_last_day,report_last_day,DATE_SUB(NOW(), INTERVAL report_freq_day DAY)) as report_last_day, report_freq_day FROM spamity_prefs ";
+} else {                        # pgsql
+    # WHERE nextdate < current_date + (months||\'months\')::interval
+    
+}
+
+$stmt = sprintf($stmt, $db->getUnixTime('report_last_day'));
+warn "[DEBUG SQL] $stmt\n" if (int(&conf('log_level')) > 0);
+$sth = $db->dbh->prepare($stmt);
+if ($sth->execute()) {
+    while ($row = $sth->fetchrow_hashref()) {
+        print $row->{username}," (",$row->{lang},")\n";
+        &setLanguage($row->{lang});
+	
+        if ($row->{report_last_date}) {
+            $vars->{report_last_day} = strftime(&translate('day-format'), localtime($row->{report_last_date}));
+            #print "Last report on ",$row->{report_last_date}," (",$vars->{report_last_day},")\n";
+        } else {
+            $vars->{report_last_day} = undef;
+        }
+	
+        %msgs = &Spamity::Web::getMessagesByDate($row->{report_last_day},
+                                                 $now,
+                                                 undef,
+                                                 undef,
+                                                 $row->{username},
+                                                 undef,
+                                                 undef,
+                                                 undef);
+
+        my @days = ();
+        my $date;
+        #while ($date = pop(@{$msgs{DAYS}})) { # reverse order
+        foreach $date (@{$msgs{DAYS}}) { 
+            push(@days, $date);
+            foreach my $msg (@{$msgs{$date}}) {
+                if ($msg->{rawsource_length} > 0) {
+                    #warn "Rawsource available for ",$msg->{id},"\n";
+                    # View
+                    $msg->{action_view_url} = encode_base64($cipher->encrypt($row->{username}."|view|".$msg->{id}));
+                    $msg->{action_view_url} =~ s/\n//g;
+                    # Reinject
+                    unless ($msg->{filter_type} eq 'virus' ^ $allow_virus_reinjection) { # xor
+                        $msg->{action_reinject_url} = encode_base64($cipher->encrypt($row->{username}."|reinject|".$msg->{id}.(($msg->{filter_type} eq 'virus')?"|1":"")));
+                        $msg->{action_reinject_url} =~ s/\n//g;
+                    }
+                    
+                    unless ($msg->{from_addr} =~ m/[\?_]+\@[\?_]+/) {
+                        # Whitelist
+                        $msg->{action_whitelist_url} = encode_base64($cipher->encrypt($row->{username}.
+                                                                                      "|whitelist|".
+                                                                                      $msg->{to_addr}."|".
+                                                                                      $msg->{from_addr}.
+                                                                                      "|1"));
+                        $msg->{action_whitelist_url} =~ s/\n//g;
+			
+                        # Blacklist
+                        $msg->{action_blacklist_url} = encode_base64($cipher->encrypt($row->{username}.
+                                                                                      "|blacklist|".
+                                                                                      $msg->{to_addr}."|".
+                                                                                      $msg->{from_addr}.
+                                                                                      "|1"));
+                        $msg->{action_blacklist_url} =~ s/\n//g;
+                    }
+                }
+            }
+        }
+
+        # Create mail
+        $vars->{days} = \@days;
+        #$vars->{subject} = encode_base64(&translate('Rejected messages for')." ".$row->{username});
+        $vars->{username} = $row->{username};
+        $vars->{recipient} = $row->{email};
+        $vars->{msgs} = \%msgs;
+        my $mail;
+        my $mailObj;
+        $tt->process('report.mail', $vars, \$mail) || warn logPrefix,'mail_report.cgi: ',$tt->error();
+	
+        # Send mail
+        if (DEBUG) {
+            print $mail;
+        }
+        else {
+            $mailObj = Mail::Internet->new([ split /\n/, $mail ]);
+            if (&Spamity::Quarantine::sendMail($vars->{sender}, $vars->{recipient}, $mailObj)) {
+                print "Report sent to ",$vars->{recipient},"\n";
+                
+                # Update database
+                $stmt = "UPDATE spamity_prefs SET report_last_day = NOW() WHERE username = '".$row->{username}."'";
+                unless ($db->dbh->do($stmt)) {
+                    print  "ERROR: Can't update report_last_day field: ",$db->dbh->errstr,"\n";
+                }
+            }
+            else {
+                print "ERROR: Can't send report to ",$vars->{recipient},"\n";
+            }
+        }
+    }
+}

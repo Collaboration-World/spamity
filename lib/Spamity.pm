@@ -30,7 +30,7 @@ BEGIN {
 }
 use vars qw($VERSION);
 
-$VERSION = 0.96;
+$VERSION = 0.97;
 
 my $CONFIG_FILE_PATH = "/etc/spamity.conf";
 

@@ -13,8 +13,8 @@
 	<li><a href="[% cgibin_path %]/search.cgi">[% i18n('search') %]</a></li>
 	<li><span>[% i18n('preferences') %]</span>
 	  <ul id="secondary">
-	    [% IF spamity_prefs %]<li><a href="[% cgibin_path %]/prefs.cgi">[% i18n('preferences') %]</a></li>[% END %][% FOREACH address = addresses %]
-	    <li><a href="[% cgibin_path %]/prefs.cgi/[% (loop.index + 1) %]">[% address %]</a></li>
+	    [% IF spamity_prefs %]<li><a href="[% cgibin_path %]/prefs.cgi">[% i18n('preferences') %]</a></li>[% END %][% IF amavisdnew %][% FOREACH address = addresses %]
+	    <li><a href="[% cgibin_path %]/prefs.cgi/[% (loop.index + 1) %]">[% address %]</a></li>[% END %]
 	  [% END %]</ul>
 	</li>
 	<li><a href="[% cgibin_path %]/help.cgi">[% i18n('help') %]</a></li>

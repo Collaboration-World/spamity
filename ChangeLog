@@ -1,3 +1,18 @@
+2010-06-08  Francis Lachapelle  <flachapelle@inverse.ca>
+
+	* lib/Spamity/Web.pm (formatMessage): fixed proper translation of
+	month.
+	(getGraphByCount): switched to UTF-8 for the graph title.
+
+	* lib/Spamity/Preference/amavisdnew.pm (getPolicy): fixed a bug
+	when an address is associated to a dummy policy (id = 0).
+
+	* cgi-bin/prefs.cgi: added support for spamity-specific
+	preferences which currently contain the option to receive a
+	quarantine report by email.
+
+	* cgi-bin/*.cgi: switched to UTF-8.
+
 2010-04-01  Francis Lachapelle  <flachapelle@inverse.ca>
 
 	* lib/Spamity/Preference/amavisdnew/pgsql.pm (_setList): fixed

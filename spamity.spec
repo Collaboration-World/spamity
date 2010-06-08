@@ -3,7 +3,7 @@
 
 Name: Spamity
 Summary: Perl modules for spamityd and its web interface.
-Version: 0.96
+Version: 0.97
 Release: 1
 License: GPL
 Group: Applications/Internet
@@ -64,16 +64,18 @@ install -d -m0755 $RPM_BUILD_ROOT%{_localstatedir}/www/cgi-bin/spamity
 cp -av cgi-bin/* $RPM_BUILD_ROOT%{_localstatedir}/www/cgi-bin/spamity
 install -D -m0755 init.d/spamityd.rh $RPM_BUILD_ROOT%{_initrddir}/spamityd
 install -D -m0700 sbin/spamityd $RPM_BUILD_ROOT%{_sbindir}/spamityd
+install -D -m0700 bin/spamity_mail_report $RPM_BUILD_ROOT%{_bindir}/spamity_mail_report
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
 %files -n perl-Spamity
 %defattr(-, root, root, 0755)
-%doc COPYING ChangeLog README RELEASE_NOTES sessions.mysql sessions.psql sessions.oracle scripts
+%doc COPYING ChangeLog README RELEASE_NOTES sessions.mysql sessions.psql sessions.oracle table.mysql table.psql scripts
 %config(noreplace) %{_sysconfdir}/spamity.conf
 %{perl_vendorlib}/Spamity.pm
 %{perl_vendorlib}/Spamity/
+%{_bindir}/spamity_mail_report
 
 %files -n spamity-web
 %defattr(-, root, root, 0755)

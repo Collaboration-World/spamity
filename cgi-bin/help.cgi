@@ -1,10 +1,7 @@
 #!/usr/bin/perl
+# -*- Mode: CPerl tab-width: 4; c-label-minimum-indentation: 4; indent-tabs-mode: nil; c-basic-offset: 4; cperl-indent-level: 4 -*-
 #
-#  $Source: /opt/cvsroot/projects/Spamity/cgi-bin/help.cgi,v $
-#  $Name:  $
-#
-#  Copyright (c) 2005, 2006, 2007
-#
+#  Copyright (c) 2005-2010
 #  Author: Francis Lachapelle <francis@Sophos.ca>
 #
 #  This program is free software; you can redistribute it and/or modify
@@ -17,11 +14,6 @@
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #  GNU General Public License for more details
 #
-
-# Uncomment and modify the following line if you installed Spamity's Perl module
-# and/or dependent modules in some non-standard directory.
-#
-# use lib "/opt/spamity/lib";
 
 use Spamity qw(conf logPrefix);
 use Spamity::i18n qw(setLanguage translate);
@@ -55,7 +47,7 @@ $url = substr($query->url(-full=>1), 0, index($query->url(-full=>1), $query->url
 $session_config = &Spamity::Web::sessionConfig();
 if ($session_config->{error}) {
     $vars->{error} = $session_config->{error};
-    print $query->header;
+    print $query->header(-charset=>'UTF-8');
     $tt->process('login.html', $vars) || warn logPrefix,"login.cgi: " . $tt->error();
     exit;
 }
@@ -67,31 +59,32 @@ if (defined $vars->{sid}) {
     
     $vars->{username} = $session->param('username');
     if (! defined $vars->{username}) {
-	# Username not found in session; go back to login page
-	$session->delete();
-	$cookie = $query->cookie(-name=>'CGISESSID',
-				 -value=>'',
-				 -expires=>'-1s');
-	print $query->redirect(-uri=>$url.'login.cgi/expired',-cookie=>$cookie);
-	exit;
+        # Username not found in session; go back to login page
+        $session->delete();
+        $cookie = $query->cookie(-name=>'CGISESSID',
+                                 -value=>'',
+                                 -expires=>'-1s');
+        print $query->redirect(-uri=>$url.'login.cgi/expired',-cookie=>$cookie);
+        exit;
     }
     $vars->{lang} = $session->param('lang');
-    $vars->{amavisdnew} = defined(&conf('amavisd-new_database', 1)) && (@addresses > 0 || $session->param('admin'));
+    @addresses = split(",", $session->param('addresses'));
+    $vars->{prefs} = (defined(&conf('amavisd-new_database', 1)) || defined(&conf('spamity_prefs_database', 1)))
+      && (@addresses > 0 || $session->param('admin'));
     $vars->{cache} = $session->param('cache');
     &setLanguage($vars->{lang});
     
     if (defined $session->param('admin')) {
-	$vars->{admin} = 1;
-	$vars->{admin_cache} = $session->param('admin_cache');
+        $vars->{admin} = 1;
+        $vars->{admin_cache} = $session->param('admin_cache');
     }
 }
 
 # Output html
 if (defined $session) {
-    print $session->header;
-}
-else {
-    print $query->header;
+    print $session->header(charset=>'UTF-8');
+} else {
+    print $query->header(-charset=>'UTF-8');
 }
 
 if ($tt) {

@@ -1,10 +1,7 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
+# -*- Mode: CPerl tab-width: 4; c-label-minimum-indentation: 4; indent-tabs-mode: nil; c-basic-offset: 4; cperl-indent-level: 4 -*-
 #
-#  $Source: /opt/cvsroot/projects/Spamity/cgi-bin/search.cgi,v $
-#  $Name:  $
-#
-#  Copyright (c) 2003, 2004, 2005, 2006, 2007
-#
+#  Copyright (c) 2003-2010
 #  Author: Francis Lachapelle <francis@Sophos.ca>
 #
 #  This program is free software; you can redistribute it and/or modify
@@ -17,11 +14,6 @@
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #  GNU General Public License for more details
 #
-
-# Uncomment and modify the following line if you installed Spamity's Perl module
-# and/or dependent modules in some non-standard directory.
-#
-# use lib "/opt/spamity/lib";
 
 use Spamity qw(conf logPrefix);
 use Spamity::Database;
@@ -54,7 +46,7 @@ $session_config = &Spamity::Web::sessionConfig();
 if ($session_config->{error}) {
     #$vars->{i18n} = \&translate;
     $vars->{error} = $session_config->{error};
-    print $query->header;
+    print $query->header(-charset=>'UTF-8');
     $tt->process('login.html', $vars) || warn logPrefix,'search.cgi: ',$tt->error();
     exit;
 }
@@ -68,7 +60,8 @@ if (defined $vars->{sid}) {
     $vars->{lang} = $session->param('lang');
     @addresses = split(",", $session->param('addresses'));
     $vars->{addresses} = \@addresses;
-    $vars->{prefs} = defined(&conf('amavisd-new_database', 1)) && (@addresses > 0 || $session->param('admin'));
+    $vars->{prefs} = (defined(&conf('amavisd-new_database', 1)) || defined(&conf('spamity_prefs_database', 1)))
+      && (@addresses > 0 || $session->param('admin'));
     $vars->{cache} = $session->param('cache');
     if (defined $session->param('admin')) {
 	$vars->{admin} = 1;
@@ -87,6 +80,7 @@ if (defined $vars->{sid}) {
 }
 else {
     # No cookie found; go back to login page
+    warn "[DEBUG] No cookie found -- redirect to ".$vars->{url}."login.cgi" if (int(&conf('log_level')) > 0);
     print $query->redirect(-uri=>$vars->{url}.'login.cgi');
     exit;
 }
@@ -111,7 +105,7 @@ if (defined $vars->{submit}) {
     # Test connection to database
     unless (Spamity::Database->new(database => 'spamity')) {
 	$vars->{error} = $Spamity::Database::message;
-	print $query->header;
+	print $query->header(-charset=>'UTF-8');
 	$tt->process('login.html', $vars) || warn logPrefix,'search.cgi: ', $tt->error();
 	exit;
     }
@@ -197,7 +191,7 @@ if (defined $vars->{submit}) {
 }
 
 # Output html
-print $session->header;
+print $session->header(charset=>'UTF-8');
 $tt->process('search.html', $vars) || warn logPrefix,'search.cgi: ',$tt->error();
 
 1;
