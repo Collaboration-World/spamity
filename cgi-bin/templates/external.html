@@ -1,0 +1,85 @@
+[% PROCESS header.html %]
+
+<body>
+
+  <div id="container">
+    <div id="info">
+      [% IF authenticated %]<form method="get" action="[% cgibin_path %]/login.cgi/logout"><p>[% username %][% IF admin %] (administration)[% END %]
+      <input class="button" type="submit" value="[% i18n('Logout') %]" /></p></form>[% ELSE %]<p></p>[% END %]
+    </div>
+    <div id="menu">
+      <ul id="primary">
+        [% IF authenticated %]<li><a href="[% cgibin_path %]/stats.cgi">[% i18n('statistics') %]</a></li>
+	<li><a href="[% cgibin_path %]/search.cgi">[% i18n('search') %]</a></li>
+	[% IF prefs %]<li><a href="[% cgibin_path %]/prefs.cgi">[% i18n('preferences') %]</a></li>[% END %]
+        [% ELSE %]<li><a href="[% cgibin_path %]/login.cgi">[% i18n('login') %]</a></li>[% END %]
+	<li><a href="[% cgibin_path %]/help.cgi">[% i18n('about') %]</a></li>
+      </ul>
+    </div>
+    <div id="main">
+      <div id="contents">
+	<!--<div style="background-color: #111; width: 300px; line-height: 1em; margin: auto; color: green; font-family: monospace; font-weight: bold;"><p>Username = [% username %]<p>
+	<p>Action = [% action %]<p>
+	[% FOREACH p = parameters %]
+	<p>Parameter = [% p %]</p>
+	[% END %]</div>-->
+
+        <div id="form">
+	  [% IF action %]<h3>[% i18n(action_title) %]</h3>[% END %]
+
+        [% IF error %]<p class="error">[% error %]</p>[% END %]
+
+[% IF action == "view" %]
+	[% IF virus %]<div id="message"><img src="[% htdocs_path %]/images/message.gif" width="16" height="16" alt="message"/>&nbsp;<a href="http://www.viruslist.com/eng/viruslistfind.html?rub4=001&findWhere=&findTxt=[% virus %]" target="_virus">[% i18n('More info about virus') %] <b>[% virus %]</b></a></div>[% END %]
+<div id="rawsource">
+      <div id="contents">
+        <table id="headers">[% FOREACH header IN keys %]
+          <tr class="row[% strip(loop.count) %]"><th>[% header %]</th><td>[% headers.$header %]</td></tr>
+        [% END %]</table>
+
+        <pre>
+[% body %]
+        </pre>
+
+	[% IF allow_reinjection %]
+<form method="post" action="[% cgibin_path %]/external.cgi/[% reinjection_action %]">
+<div class="button"><input class="button" type="submit" name="reinject" value="[% i18n('Reinject') %]" /></div></form>
+        [% END %]
+      </div> <!-- #contents -->
+    </div> <!-- #rawsource -->
+
+    
+[% ELSIF action == "reinject" %]
+    [% IF confirmation %]<form method="post" action="[% cgibin_path %]/external.cgi/[% reinjection_action %]">
+  <div id="message">
+    <img src="[% htdocs_path %]/images/warning.gif" width="16" height="16" alt="warning" />&nbsp;[% confirmation %]&nbsp;<input type="submit" class="button" name="reinject" value="[% i18n('Reinject') %]"/>
+  </div></form>
+    [% ELSIF mail_from %]<div id="message">[% i18n('The message from') %] <b>[% mail_from %]</b> [% i18n('was successfully sent to') %] <b>[% rcpt_to %]</b>.</div>
+    [% END %]
+
+
+[% ELSIF action == "whitelist" OR action == "blacklist" %]
+    [% IF options %]
+      <p>[% i18n('Choose which part of the email address you want to') %] [% i18n(action) %]:</p>
+      <form method="post" action="[% cgibin_path %]/external.cgi/[% action_url %]">
+      <div class="radio">[% FOREACH address = options %]
+      <input type="radio" name="address" value="[% address %]"[% IF loop.first() %] checked="checked"[% END %]/><b>[% address %]</b>[% IF loop.index == 2 %] <span class="note"><i>([% i18n('only applicable to local domains')%])</i></span class="note">[% END %]<br/>
+      [% END %]</div>
+      <div class="button"><input type="submit" class="button" name="[% action %]" value="[% i18n('Add') %]"/></div>
+      </form>
+    [% ELSIF sender_addr %]
+    <div id="message">[% i18n('The entry') %] <b>[% sender_addr %]</b> [% i18n('has been added to the') %] [% i18n(action) %] [% i18n('of') %] <b>[% recipient_addr %]</b>.</div>
+    [% END %]
+
+
+[% END %]
+
+
+        </div> <!-- #form -->
+      </div> <!-- #contents -->
+    </div> <!-- #main -->
+    [% PROCESS footer.html %]
+  </div> <!-- #container -->
+
+</body>
+</html>
