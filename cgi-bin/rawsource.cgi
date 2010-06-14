@@ -47,6 +47,7 @@ $vars->{cgibin_path} = &conf('cgibin_path');
 $vars->{htdocs_path} = &conf('htdocs_path', 1);
 $vars->{htdocs_path} = '' if ($vars->{htdocs_path} eq '/');
 $vars->{allow_reinjection} = 1 if (defined &conf('reinjection_smtp_server', 1));
+$vars->{version} = $Spamity::VERSION . '';
 
 # Test connection to database
 unless (Spamity::Database->new(database => 'spamity')) {

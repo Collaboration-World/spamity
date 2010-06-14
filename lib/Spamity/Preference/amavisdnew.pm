@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# -*- Mode: CPerl tab-width: 4; c-label-minimum-indentation: 4; indent-tabs-mode: nil; c-basic-offset: 4; cperl-indent-level: 4 -*-
+# -*- Mode: CPerl; tab-width: 4; c-label-minimum-indentation: 4; indent-tabs-mode: nil; c-basic-offset: 4; cperl-indent-level: 4 -*-
 #
 #  Copyright (c) 2004-2010
 #
@@ -311,7 +311,7 @@ sub setPolicy
       my @values = ();
       my $stmt;
       my $sth;
-      my $policy_id = undef;
+      my $policy_id = 0;
       my $user_id = undef;
       my $previous_policy_id = undef;
       my $was_custom = 0;
