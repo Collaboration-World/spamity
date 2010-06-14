@@ -229,7 +229,7 @@ sub getPolicy
       if ($db = Spamity::Database->new(database => 'amavisd-new')) {
           if (defined $id) {
               # Select policy; user may not exist
-              $stmt = sprintf("select * from %s where id = ? and policy_name != 'NULL'",
+              $stmt = sprintf("select id as policy_id, p.* from %s as p where id = ? and policy_name != 'NULL'",
                               &conf('amavisd-new_table_policy'));
               @vars = ($id);
           } else {
@@ -239,7 +239,7 @@ sub getPolicy
               @vars = ($email);
           }
 
-          warn "[DEBUG SQL] Spamity::Preference::amavisdnew getPolicy $stmt\n" if (int(&conf('log_level')) > 0);
+          warn "[DEBUG SQL] Spamity::Preference::amavisdnew getPolicy(",join(", ", @vars),") $stmt\n" if (int(&conf('log_level')) > 0);
 
           $sth = $db->dbh->prepare($stmt);
           if ($sth->execute(@vars)) {
@@ -261,11 +261,11 @@ sub getPolicy
                       $policy->{id} = 'CUSTOM' if (not defined $policy->{policy_name});
                   }
               }
-              if (defined $id) {
+              if (defined $email) {
                   # Retrieve user id, if it exists
                   $stmt = sprintf('select id from %s where lower(email) = ?', &conf('amavisd-new_table_users'));
 		
-                  warn "[DEBUG SQL] Spamity::Preference::amavisdnew getPolicy $stmt\n" if (int(&conf('log_level')) > 0);
+                  warn "[DEBUG SQL] Spamity::Preference::amavisdnew getPolicy($email) $stmt\n" if (int(&conf('log_level')) > 0);
 		
                   $sth = $db->dbh->prepare($stmt);
                   if ($sth->execute($email)) {

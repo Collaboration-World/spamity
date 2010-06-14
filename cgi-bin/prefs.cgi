@@ -195,8 +195,7 @@ if ($vars->{email}) {
         # An error occured
         $vars->{error} = $Spamity::Preference::amavisdnew::message;
     }
-
-    if (!defined($vars->{policy}) || $vars->{policy}->{id} eq '0') {
+    if (!defined($vars->{policy})) { # || $vars->{policy}->{id} == 0) {
         # User has no policy or is switching to a default or custom policy
         $vars->{policy}->{policy_name} = undef;
         $vars->{policy}->{id} = (defined($query->param('policy'))?$query->param('policy'):'DEFAULT');
