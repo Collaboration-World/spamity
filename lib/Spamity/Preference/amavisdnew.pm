@@ -151,7 +151,7 @@ sub _getList
                           &conf('amavisd-new_table_mailaddr'), &conf('amavisd-new_table_wblist'),
                           join(',',@$chars));
 
-          warn "[DEBUG SQL] Spamity::Preference::amavisdnew _getList $stmt\n" if (int(&conf('log_level')) > 0);
+          warn "[DEBUG SQL] Spamity::Preference::amavisdnew _getList($user_id) $stmt\n" if (int(&conf('log_level')) > 0);
 	
           $sth = $db->dbh->prepare($stmt);
           if ($sth->execute($user_id)) {
@@ -325,7 +325,7 @@ sub setPolicy
           $stmt = sprintf("select u.policy_id, u.id as user_id, p.policy_name from %s as u left join %s as p on p.id = u.policy_id where lower(u.email) = ?",
                           &conf('amavisd-new_table_users'), &conf('amavisd-new_table_policy'));
 	
-          warn "[DEBUG SQL] Spamity::Preference::amavisdnew setPolicy $stmt\n" if (int(&conf('log_level')) > 0);
+          warn "[DEBUG SQL] Spamity::Preference::amavisdnew setPolicy($email) $stmt\n" if (int(&conf('log_level')) > 0);
 	
           $sth = $db->dbh->prepare($stmt);
           if ($sth->execute($email)) {
@@ -336,7 +336,7 @@ sub setPolicy
               }
           } else {
               $message = 'Select-statement error: '.$DBI::errstr;
-              warn logPrefix, "Spamity::Preference::amavisdnew setPolicy $message\n";
+              warn logPrefix, "Spamity::Preference::amavisdnew setPolicy($email) $message\n";
               return 0;
           }
 	
@@ -354,12 +354,12 @@ sub setPolicy
                       $stmt = sprintf('delete from %s where id = ?',
                                       &conf('amavisd-new_table_users'));
 		    
-                      warn "[DEBUG SQL] Spamity::Preference::amavisdnew setPolicy $stmt\n" if (int(&conf('log_level')) > 0);
+                      warn "[DEBUG SQL] Spamity::Preference::amavisdnew setPolicy($user_id) $stmt\n" if (int(&conf('log_level')) > 0);
 		    
                       $sth = $db->dbh->prepare($stmt);
                       if (!$sth->execute($user_id)) {
                           $message = 'Delete-statement error: '.$DBI::errstr;
-                          warn logPrefix, "Spamity::Preference::amavisdnew setPolicy $message\n";
+                          warn logPrefix, "Spamity::Preference::amavisdnew setPolicy($user_id) $message\n";
                           return 0;
                       }
                       # Delete WB lists
@@ -374,12 +374,12 @@ sub setPolicy
                       $stmt = sprintf('delete from %s where id = ?',
                                       &conf('amavisd-new_table_policy'));
 		    
-                      warn "[DEBUG SQL] Spamity::Preference::amavisdnew setPolicy $stmt\n" if (int(&conf('log_level')) > 0);
+                      warn "[DEBUG SQL] Spamity::Preference::amavisdnew setPolicy($previous_policy_id) $stmt\n" if (int(&conf('log_level')) > 0);
 		    
                       $sth = $db->dbh->prepare($stmt);
                       if (!$sth->execute($previous_policy_id)) {
                           $message = 'Delete-statement error: '.$DBI::errstr;
-                          warn logPrefix, "Spamity::Preference::amavisdnew setPolicy $message\n";
+                          warn logPrefix, "Spamity::Preference::amavisdnew setPolicy($previous_policy_id) $message\n";
                           return 0;
                       }
                   }
@@ -414,7 +414,7 @@ sub setPolicy
                   $stmt = sprintf('update %s set %s where id = ?',
                                   &conf('amavisd-new_table_policy'), join(', ', @columns));
 
-                  warn "[DEBUG SQL] Spamity::Preference::amavisdnew setPolicy $stmt\n" if (int(&conf('log_level')) > 0);
+                  warn "[DEBUG SQL] Spamity::Preference::amavisdnew setPolicy(", join(', ', @values), ", $previous_policy_id) $stmt\n" if (int(&conf('log_level')) > 0);
 
                   $sth = $db->dbh->prepare($stmt);
                   push(@values, $previous_policy_id);
@@ -443,12 +443,12 @@ sub setPolicy
                   $stmt = sprintf('delete from %s where id = ?',
                                   &conf('amavisd-new_table_policy'));
 
-                  warn "[DEBUG SQL] Spamity::Preference::amavisdnew setPolicy $stmt\n" if (int(&conf('log_level')) > 0);
+                  warn "[DEBUG SQL] Spamity::Preference::amavisdnew setPolicy($previous_policy_id) $stmt\n" if (int(&conf('log_level')) > 0);
 
                   $sth = $db->dbh->prepare($stmt);
                   if (!$sth->execute($previous_policy_id)) {
                       $message = 'Delete-statement error: '.$DBI::errstr;
-                      warn logPrefix, "Spamity::Preference::amavisdnew setPolicy $message\n";
+                      warn logPrefix, "Spamity::Preference::amavisdnew setPolicy($previous_policy_id) $message\n";
                       return 0;
                   }
               }
@@ -460,7 +460,7 @@ sub setPolicy
               $stmt = sprintf('update %s set policy_id = ? where id = ?',
                               &conf('amavisd-new_table_users'));
 
-              warn "[DEBUG SQL] Spamity::Preference::amavisdnew setPolicy $stmt\n" if (int(&conf('log_level')) > 0);
+              warn "[DEBUG SQL] Spamity::Preference::amavisdnew setPolicy($policy_id, $user_id) $stmt\n" if (int(&conf('log_level')) > 0);
 
               $sth = $db->dbh->prepare($stmt);
               if (!$sth->execute($policy_id, $user_id)) {
@@ -473,7 +473,7 @@ sub setPolicy
               $stmt = sprintf('insert into %s (email, policy_id) values (?, ?)',
                               &conf('amavisd-new_table_users'));
 
-              warn "[DEBUG SQL] Spamity::Preference::amavisdnew setPolicy $stmt\n" if (int(&conf('log_level')) > 0);
+              warn "[DEBUG SQL] Spamity::Preference::amavisdnew setPolicy($email, $policy_id) $stmt\n" if (int(&conf('log_level')) > 0);
 
               $sth = $db->dbh->prepare($stmt);
               if (!$sth->execute($email, $policy_id)) {
