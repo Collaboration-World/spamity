@@ -332,7 +332,7 @@ sub setPolicy
               if (my $row = $sth->fetchrow_arrayref) {
                   $previous_policy_id = $$row[0];
                   $user_id = $$row[1];
-                  $was_custom = ($$row[2] eq '' && $previous_policy_id > 0);
+                  $was_custom = (!defined($$row[2]) && $previous_policy_id > 0);
               }
           } else {
               $message = 'Select-statement error: '.$DBI::errstr;
@@ -346,6 +346,21 @@ sub setPolicy
                   my $wl = $query->param('wl'); $wl =~ s/\s//g;
                   my $bl = $query->param('bl'); $bl =~ s/\s//g;
 		
+                  if ($was_custom) {
+                      # Delete previous custom policy
+                      $stmt = sprintf('delete from %s where id = ?',
+                                      &conf('amavisd-new_table_policy'));
+		    
+                      warn "[DEBUG SQL] Spamity::Preference::amavisdnew setPolicy($previous_policy_id) $stmt\n" if (int(&conf('log_level')) > 0);
+		    
+                      $sth = $db->dbh->prepare($stmt);
+                      if (!$sth->execute($previous_policy_id)) {
+                          $message = 'Delete-statement error: '.$DBI::errstr;
+                          warn logPrefix, "Spamity::Preference::amavisdnew setPolicy($previous_policy_id) $message\n";
+                          return 0;
+                      }
+                  }
+
                   if ($wl || $bl) {
                       # Use the dummy policy (ID = 0)
                       $policy_id = 0;
@@ -367,21 +382,6 @@ sub setPolicy
                       &setWhitelist($user_id);
 		    
                       return 1;
-                  }
-		
-                  if ($was_custom) {
-                      # Delete previous custom policy
-                      $stmt = sprintf('delete from %s where id = ?',
-                                      &conf('amavisd-new_table_policy'));
-		    
-                      warn "[DEBUG SQL] Spamity::Preference::amavisdnew setPolicy($previous_policy_id) $stmt\n" if (int(&conf('log_level')) > 0);
-		    
-                      $sth = $db->dbh->prepare($stmt);
-                      if (!$sth->execute($previous_policy_id)) {
-                          $message = 'Delete-statement error: '.$DBI::errstr;
-                          warn logPrefix, "Spamity::Preference::amavisdnew setPolicy($previous_policy_id) $message\n";
-                          return 0;
-                      }
                   }
               }
           } elsif ($query->param('policy') eq 'CUSTOM') {
