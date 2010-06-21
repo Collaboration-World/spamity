@@ -344,7 +344,7 @@ foreach $path (@PATHS) {
 # Filter type : spam (via amavisd-new)
 # Filter id   : SpamAssassin
 #*********************************************************************
-	    elsif (m/^($date) (.*)$hostname amavis.* (?:Blocked SPAM)?(?:Not-Delivered)?, .*<(?:(.*?)@)?(.*?)> -> ((?:<(?:.*?@)?.*?>,?)+).*? ((?:quarantine:? (\S+?)(?:\.gz)?, )?(?:Resent-)?(?:Message-ID|mail_id): .*, Hits: (.*?)(?:, .*)?)$/) {
+	    elsif (m/^($date) (.*)$hostname amavis.* (?:Blocked SPAM)?(?:Not-Delivered)?, .*<(?:(.*?)@)?(.*?)> -> ((?:<(?:.*?@)?.*?>,?)+).*? ((?:quarantine:?.*? (\S+?)(?:\.gz)?, )?(?:Resent-)?(?:Message-ID|mail_id): .*, Hits: (.*?)(?:, .*)?)$/) {
 		($spam_date, $from_user, $from_host, $filter_type, $filter_id, $description, $rawsource) =
 		    (&buildDate($year,$1,$2), $3, $4, 'spam', "SpamAssassin (Score: $8)", $6, $7);
 		@to = &parseAddresses($5);
