@@ -1,10 +1,7 @@
 #!/usr/bin/perl
-#
-#  $Source: /opt/cvsroot/projects/Spamity/lib/Spamity/Lookup/file.pm,v $
-#  $Name:  $
+# -*- Mode: CPerl tab-width: 4; c-label-minimum-indentation: 4; indent-tabs-mode: nil; c-basic-offset: 4; cperl-indent-level: 4 -*-
 #
 #  Copyright (c) 2004, 2005, 2006, 2007, 2010
-#
 #  Author: Francis Lachapelle <francis@Sophos.ca>
 #
 #  This program is free software; you can redistribute it and/or modify
@@ -183,16 +180,16 @@ sub getUsersByAddress
 	    #if ($line =~ m/^\@$domain\s+(.+(?:,.+)?)$/i ||     # We no longer support catchall
 	    if ($line =~ m/^(?!#)(\S+\@\S+)\s+(.+(?:,.+)?)$/i) {
 		# File is an addresses table
-	        $current_address = $1;
-		$list = $2;
+	        $current_address = lc($1);
+		$list = lc($2);
 		$list =~ s/\s//g;
 		$list =~ s/\@$master_domain//g;
 		push(@{$addresses{$current_address}}, split(",", $list));
 	      }
 	    elsif ($line =~ m/^(\S+\@$master_domain):\s+(.+(?:,.+)?)$/i) {
 	      # File is an aliases table
-	      $current_address = $1;
-	      $list = $2;
+	      $current_address = lc($1);
+	      $list = lc($2);
 	      $list =~ s/\s//g;
 	      push(@{$addresses{$current_address}}, split(",", $list));
 	    }

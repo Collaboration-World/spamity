@@ -1,10 +1,7 @@
 #!/usr/bin/perl
+# -*- Mode: CPerl tab-width: 4; c-label-minimum-indentation: 4; indent-tabs-mode: nil; c-basic-offset: 4; cperl-indent-level: 4 -*-
 #
-#  $Source: /opt/cvsroot/projects/Spamity/lib/Spamity/Database/oracle.pm,v $
-#  $Name:  $
-#
-#  Copyright (c) 2007
-#
+#  Copyright (c) 2007-2011
 #  Author: Francis Lachapelle <francis@Sophos.ca>
 #
 #  This program is free software; you can redistribute it and/or modify
@@ -186,7 +183,7 @@ sub getUnixTime
 
     ($column) = @_;
 
-    return "86400 * (NEW_TIME($column,'EDT','GMT') - TO_DATE('01.01.1970','DD.MM.YYYY'))";
+    return "86400 * (TO_DATE(TO_CHAR(SYS_EXTRACT_UTC($column),'YYYYMMDD-HH24:MI:SS'),'YYYYMMDD-HH24:MI:SS') - TO_DATE('01.01.1970','DD.MM.YYYY'))";
 } # getMinUnixTime
 
 

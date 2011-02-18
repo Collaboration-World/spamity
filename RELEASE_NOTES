@@ -2,8 +2,32 @@
 Spamity v0.9.7 release notes (YYYY-MM-DD)
 ===============================================================================
 
-utf-8
-mail report
+Overview
+-------------------------------------------------------------------------------
+
+This is a maintenance release. It fixes some bugs found in version 0.9.6. It
+also introduces support for mail reports of blocked messages with one-click
+options to view and reinject quarantined messages.
+
+
+Changes
+-------------------------------------------------------------------------------
+
+- CGI templates are now encoded in UTF-8.
+
+- Added new script and preferences pane to allow users to receive a mail report.
+  The mail report is disabled by default and requires a new SQL table (see the
+  files table.*).
+
+- Fixed various bugs related to the handling of amavisd-new preferences tables,
+  including a performance issue with PostgreSQL.
+
+- Added caching to Lookup::file and automatic reload upon file change.
+
+- Daemon will no longer retrieve non-fatal SMTP errors (Greylisting).
+
+- Fixed a timezone conversion with Oracle that would affect the dates in the
+  Web interface.
 
 ===============================================================================
 Spamity v0.9.6 release notes (2007-07-12)

@@ -1,3 +1,8 @@
+2011-02-18  Francis Lachapelle  <flachapelle@inverse.ca>
+
+	* lib/Spamity/Database/oracle.pm (getUnixTime): we now use the
+	database timezone instead of the static EDT timezone.
+
 2010-06-08  Francis Lachapelle  <flachapelle@inverse.ca>
 
 	* lib/Spamity/Web.pm (formatMessage): fixed proper translation of

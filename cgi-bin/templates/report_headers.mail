@@ -1,4 +1,4 @@
-From: Rapport pourriel <[% sender %]>
+From: Spamity <[% sender %]>
 To: [% recipient %]
 Subject: [% quotedprint(i18n('Rejected messages for'), username) %]
 Content-Type: text/html; charset=UTF-8

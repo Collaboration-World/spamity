@@ -102,9 +102,9 @@ BEGIN {
 use vars qw($message);
 
 $message = undef;
-my %ATTRIBUTES = (PrintError       => 0, 
-		  RaiseError       => 0, 
-		  AutoCommit       => 1, 
+my %ATTRIBUTES = (PrintError       => 0,
+		  RaiseError       => 0,
+		  AutoCommit       => 1,
 		  InactiveDestroy  => 1,
 		  LongTruncOk      => 1,
 		  LongReadLen      => &conf('quarantine_size_max') * 1024);
