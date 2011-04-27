@@ -1,3 +1,18 @@
+2011-04-27  Francis Lachapelle  <flachapelle@inverse.ca>
+
+	* cgi-bin/external.cgi (disablereport): new action to quickly
+	disable email reports.
+
+	* bin/spamity_mail_report: added support for Oracle.
+	No longer report messages that are not quarantined.
+	No longer send a report if there's no quarantined messages.
+
+	* lib/Spamity/Web.pm (getMessagesByDate): added a new argument,
+	is_quarantined, to return only messages that have been quarantined.
+
+	* cgi-bin/prefs.cgi: it's no longer required to enable amavisd-new
+	policies to show this page; the Spamity preferences are enough.
+
 2011-02-18  Francis Lachapelle  <flachapelle@inverse.ca>
 
 	* lib/Spamity/Database/oracle.pm (getUnixTime): we now use the
@@ -29,9 +44,9 @@
 
 2007-10-15 Francis Lachapelle <francis@Sophos.ca>
 
-	* Added calls to finish on statement handles for 
+	* Added calls to finish on statement handles for
 	scripts/sessions_maintenance_sql.pl.
-	
+
 2007-08-07 Francis Lachapelle <francis@Sophos.ca>
 
 	* Improved error handling of scripts/sessions_maintenance_sql.pl.
@@ -49,12 +64,12 @@
 2007-07-12 Francis Lachapelle <francis@Sophos.ca>
 
 	* Added support for CGI::Session::Oracle.
-	* Fixed SQL query in function getPeriodByDay in 
+	* Fixed SQL query in function getPeriodByDay in
 	  lib/Spamity/Database/oracle.pm.
-	* Renamed scripts/multiple_tables.pl to 
+	* Renamed scripts/multiple_tables.pl to
 	  scripts/create_tables.pl.
 	* Tagged CVS branch to v0.9.6.
-	
+
 2007-07-10 Francis Lachapelle <francis@Sophos.ca>
 
 	* Added support for custom port number for Oracle databases.
@@ -65,15 +80,15 @@
 	  order to improve portability.
 	* Changed sbin/spamityd to ignore non-fatal 4xx SMTP errors -
 	  normally greylisted connections (thanks Eddy!).
-	* Added verification of database definition in 
+	* Added verification of database definition in
 	  lib/Spamity/Database.pm.
 	* Added the possibility to define white/black list without
 	  specifying an amavisd policy (actually, the policy has id 0).
 	* Improved french translation.
 	* Improved URL and language handling in CGI scripts.
-	
+
 2007-07-05 Francis Lachapelle <francis@Sophos.ca>
-	
+
 	* Added support to define environment variables in
 	  configuration file.
 	* Added lib/Spamity/Database/oracle.pm.

@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # -*- Mode: CPerl tab-width: 4; c-label-minimum-indentation: 4; indent-tabs-mode: nil; c-basic-offset: 4; cperl-indent-level: 4 -*-
 #
-#  Copyright (c) 2003-2010
+#  Copyright (c) 2003-2011
 #  Author: Francis Lachapelle <francis@Sophos.ca>
 #
 #  This program is free software; you can redistribute it and/or modify
@@ -62,9 +62,10 @@ if (! -t STDIN && ! -t STDOUT && &conf('logfile', 1)) {
             'banned',
             'helo');
 
-# External actions supported
+# External actions supported (implemented in external.cgi)
 @ACTIONS = ('view',
             'reinject',
+            'disablereport',
             'whitelist',
             'blacklist');
 
@@ -437,6 +438,7 @@ sub getMessagesByDate
       my $to_date;
       my $email;
       my $filter_type;
+      my $is_quarantined;
       my $id;
       my $domain;
       my $page;
@@ -455,7 +457,7 @@ sub getMessagesByDate
       my $db;
       my $sth;
     
-      ($from_date, $to_date, $email, $filter_type, $id, $domain, $page, $results_page) = @_;
+      ($from_date, $to_date, $email, $filter_type, $is_quarantined, $id, $domain, $page, $results_page) = @_;
 
       $db = Spamity::Database->new(database => 'spamity');
 
@@ -493,6 +495,11 @@ sub getMessagesByDate
           push(@conditions, "filter_type = '$filter_type'");
       }
     
+      # Must be quarantined
+      if ($is_quarantined) {
+          push(@conditions, sprintf("%s > 0", $db->getOctetLength('rawsource')));
+      }
+
       # Email/domain
       if ($email) {
           push(@conditions, '(' . &formatAddresses(['to','from'], [$email]) . ')');
@@ -540,7 +547,7 @@ sub getMessagesByDate
           $db->formatLimitWithOffset(\$stmt, \@columns, $results_page, $page*$results_page);
       }
 
-      warn "[DEBUG SQL] Spamity::Web getMessagesByDate $stmt\n" if (int(&conf('log_level', 1)) > 0);
+      warn logPrefix, "[DEBUG SQL] Spamity::Web getMessagesByDate $stmt\n" if (int(&conf('log_level', 1)) > 0);
     
       $sth = $db->dbh->prepare($stmt);
       if ($sth && $sth->execute()) {

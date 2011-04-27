@@ -21,6 +21,7 @@ use Spamity::Lookup qw(getAddressesByUser);
 use Spamity::Quarantine;
 use Spamity::i18n qw(setLanguage translate);
 use Spamity::Preference::amavisdnew qw(getPolicy getBlacklist setBlacklist getWhitelist setWhitelist);
+use Spamity::Preference::spamity qw(setPrefs);
 
 use Crypt::CBC;
 use Crypt::Blowfish;
@@ -79,6 +80,7 @@ if ($query->url(-relative=>1, -path=>1) =~ m/$script\/+(.+)\/?$/) {
     # Possible actions:
     # - view
     # - reinject
+    # - disablereport
     # - whitelist
     # - blacklist
 
@@ -245,6 +247,24 @@ sub reinject
       return 1;
   }
 
+sub disablereport
+  {
+      # <returns>
+      #   1 on success
+
+      $vars->{action_title} = 'reports';
+
+      # Test connection to database
+      unless (Spamity::Database->new(database => 'spamity_prefs')) {
+          die $Spamity::Database::message;
+      }
+
+      unless (&setPrefs($vars->{username})) {
+          die $Spamity::Preference::spamity::message;
+      }
+
+      return 1;
+  }
 
 sub whitelist
   {

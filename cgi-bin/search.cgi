@@ -152,13 +152,14 @@ if (defined $vars->{submit}) {
     }
     elsif ($vars->{display} eq 'date') {
 	%msgs = &Spamity::Web::getMessagesByDate($vars->{from_date},
-						 $vars->{to_date},
-						 $vars->{email},
-						 $vars->{filter_type},
-						 $user,
-						 $domain,
-						 $vars->{page} - 1,
-						 $vars->{results});
+                                             $vars->{to_date},
+                                             $vars->{email},
+                                             $vars->{filter_type},
+                                             undef,
+                                             $user,
+                                             $domain,
+                                             $vars->{page} - 1,
+                                             $vars->{results});
     }
     
     $vars->{msgs} = \%msgs;

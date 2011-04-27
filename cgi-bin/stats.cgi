@@ -185,13 +185,14 @@ elsif ($vars->{admin} == 1) {
 	
 	my %users;
 	my %msgs = &Spamity::Web::getMessagesByDate(undef,
-						    undef,
-						    undef,
-						    undef,
-						    undef,
-						    undef,
-						    0,
-						    20);
+                                                undef,
+                                                undef,
+                                                undef,
+                                                undef,
+                                                undef,
+                                                undef,
+                                                0,
+                                                20);
 	
 	$vars->{msgs} = \%msgs;	
     }
@@ -210,13 +211,14 @@ else {
 
     my %users;
     my %msgs = &Spamity::Web::getMessagesByDate(undef,
-						undef,
-						undef,
-						undef,
-						$vars->{username},
-						undef,
-						0,
-						10);
+                                                undef,
+                                                undef,
+                                                undef,
+                                                undef,
+                                                $vars->{username},
+                                                undef,
+                                                0,
+                                                10);
 
     $vars->{msgs} = \%msgs;
 }

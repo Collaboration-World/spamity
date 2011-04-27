@@ -58,6 +58,10 @@
     [% END %]
 
 
+[% ELSIF action == "disablereport" %]
+      <p>[% i18n('Reports on blocked messages for your account have been disabled.') %]</p>
+
+
 [% ELSIF action == "whitelist" OR action == "blacklist" %]
     [% IF options %]
       <p>[% i18n('Choose which part of the email address you want to') %] [% i18n(action) %]:</p>

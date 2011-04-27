@@ -16,14 +16,17 @@
       <td style="padding: 0 3px;">[% msg.filter_type %]</td>
       <td style="padding: 0 3px;">[% IF msg.action_view_url %]<a href="[% site_url %][% cgibin_path %]/external.cgi/[% msg.action_view_url %]">[% i18n('view') %]</a>[% ELSE %]&nbsp;[% END %]</td>
       <td style="padding: 0 3px;">[% IF msg.action_reinject_url %]<a href="[% site_url %][% cgibin_path %]/external.cgi/[% msg.action_reinject_url %]">[% i18n('receive') %]</a>[% ELSE %]&nbsp;[% END %]</td>
+[% IF amavisdnew %]
       <td style="padding: 0 3px;">[% IF msg.action_whitelist_url %]<a href="[% site_url %][% cgibin_path %]/external.cgi/[% msg.action_whitelist_url %]">[% i18n('whitelist') %]</a>[% ELSE %]&nbsp;[% END %]</td>
       <td style="padding: 0 3px;">[% IF msg.action_blacklist_url %]<a href="[% site_url %][% cgibin_path %]/external.cgi/[% msg.action_blacklist_url %]">[% i18n('blacklist') %]</a>[% ELSE %]&nbsp;[% END %]</td>
+[% END %]
     </tr>
   [% END %]
 [% END %]
 [% END %]
 </table>
 
-<p>[% i18n('Login to') %] <a href="[% site_url %][% cgibin_path %]/login.cgi">Spamity</a></p>
+<p><a href="[% site_url %][% cgibin_path %]/external.cgi/[% action_disablereport_url %]">[% i18n('Stop receiving spam reports') %]</a><br>
+[% i18n('Login to') %] <a href="[% site_url %][% cgibin_path %]/login.cgi">Spamity</a></p>
 </body>
 </html>

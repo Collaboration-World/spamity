@@ -46,15 +46,6 @@ $vars = &Spamity::Web::getParameters($query);
 # Language (in case a message has to be displayed)
 #&setLanguage($vars->{lang});
 
-# Test connection to database
-unless (Spamity::Database->new(database => 'amavisd-new')) {
-    #$vars->{i18n} = \&translate;
-    $vars->{error} = $Spamity::Database::message;
-    print $query->header(-charset=>'UTF-8');
-    $tt->process('login.html', $vars) || warn logPrefix,"login.cgi: ",$tt->error();
-    exit;
-}
-
 # Verify session handler
 $session_config = &Spamity::Web::sessionConfig();
 if ($session_config->{error}) {
@@ -105,6 +96,28 @@ unless ($vars->{amavisdnew} || $vars->{spamity_prefs}) {
     # No preferences
     print $query->redirect(-uri=>$vars->{url}.'search.cgi');
     exit;
+}
+
+if ($vars->{amavisdnew}) {
+    # Test connection to database
+    unless (Spamity::Database->new(database => 'amavisd-new')) {
+        #$vars->{i18n} = \&translate;
+        $vars->{error} = $Spamity::Database::message;
+        print $query->header(-charset=>'UTF-8');
+        $tt->process('login.html', $vars) || warn logPrefix,"login.cgi: ",$tt->error();
+        exit;
+    }
+}
+
+if ($vars->{spamity_prefs}) {
+    # Test connection to database
+    unless (Spamity::Database->new(database => 'spamity_prefs')) {
+        #$vars->{i18n} = \&translate;
+        $vars->{error} = $Spamity::Database::message;
+        print $query->header(-charset=>'UTF-8');
+        $tt->process('login.html', $vars) || warn logPrefix,"login.cgi: ",$tt->error();
+        exit;
+    }
 }
 
 unless (@addresses > 0 || $vars->{admin} && !$vars->{amavisdnew}) {

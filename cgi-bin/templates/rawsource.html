@@ -13,7 +13,7 @@
   <div id="message">
     <img src="[% htdocs_path %]/images/warning.gif" width="16" height="16" alt="warning" />&nbsp;[% confirmation %]&nbsp;<input type="submit" class="button" name="reinject" value="[% i18n('Reinject') %]"/>
   </div></form>
-[% ELSIF virus %]<div id="message"><img src="[% htdocs_path %]/images/message.gif" width="16" height="16" alt="message"/>&nbsp;<a href="http://www.viruslist.com/eng/viruslistfind.html?rub4=001&findWhere=&findTxt=[% virus %]" target="_virus">[% i18n('More info about virus') %] <b>[% virus %]</b></a></div>
+[% ELSIF virus %]<div id="message"><img src="[% htdocs_path %]/images/message.gif" width="16" height="16" alt="message"/>&nbsp;<a href="http://www.securelist.com/en/descriptions?words=[% virus %]" target="_virus">[% i18n('More info about virus') %] <b>[% virus %]</b></a></div>
 [% ELSIF error %]<div id="message"><img src="[% htdocs_path %]/images/warning.gif" width="16" height="16" alt="warning"/>&nbsp;[% error %]</div>
 [% ELSE %]<div id="message">&nbsp;</div>[% END %]
 

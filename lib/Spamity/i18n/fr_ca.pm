@@ -169,6 +169,7 @@ use vars qw(@ISA %Lexicon);
 	    # external.html
 	    'The message from' => 'Le message de',
 	    'was successfully sent to' => 'a été envoyé é',
+            'Reports on blocked messages for your account have been disabled.' => 'Les rapports sur les messages bloqués pour votre compte ne vous seront plus livrés par courriel.';
 	    'The entry' => 'L&#39;entrée',
 	    'has been added to the' => 'a été ajoutée à la',
 	    'of' => 'de',
