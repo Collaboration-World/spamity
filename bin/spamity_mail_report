@@ -51,7 +51,7 @@ die $Spamity::Database::message unless ($db = Spamity::Database->new(database =>
 # Establish database connection for Spamity
 die $Spamity::Database::message unless (Spamity::Database->new(database => 'spamity'));
 
-$vars->{amavisdnew} = defined(&conf('amavisd-new_database'));
+$vars->{amavisdnew} = defined(&conf('amavisd-new_database'), 1);
 if ($vars->{amavisdnew}) {
     # Test connection to database of AMaViSd-new
     die $Spamity::Database::message unless (Spamity::Database->new(database => 'amavisd-new'));
@@ -110,7 +110,7 @@ warn logPrefix, "[DEBUG SQL] $stmt\n" if (int(&conf('log_level')) > 0);
 
 $sth = $db->dbh->prepare($stmt);
 if ($sth->execute()) {
-    while ($row = $sth->fetchrow_hashref()) {
+    while ($row = $sth->fetchrow_hashref(NAME_lc)) {
         print $row->{username}," (",$row->{lang},")\n";
         &setLanguage($row->{lang});
 	

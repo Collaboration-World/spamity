@@ -53,7 +53,7 @@ sub getPrefs
 	warn "[DEBUG SQL] Spamity::Preference::spamity getPrefs $stmt [$username]\n" if (int(&conf('log_level')) > 0);
 	$sth = $db->dbh->prepare($stmt);
 	if ($sth->execute($username)) {
-	    $prefs = $sth->fetchrow_hashref();
+	    $prefs = $sth->fetchrow_hashref(NAME_lc);
 	    if (defined $prefs) {
 		$prefs->{active} = 1;
 	    }
