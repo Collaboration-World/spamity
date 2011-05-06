@@ -1,3 +1,8 @@
+2011-05-06  Francis Lachapelle  <flachapelle@inverse.ca>
+
+	* bin/spamity_mail_report: fixed select statement to properly
+	respect the date of the last report.
+
 2011-04-27  Francis Lachapelle  <flachapelle@inverse.ca>
 
 	* cgi-bin/external.cgi (disablereport): new action to quickly

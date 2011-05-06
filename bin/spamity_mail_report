@@ -61,7 +61,6 @@ if ($vars->{amavisdnew}) {
 die "Reinjection is not configured." unless (&conf('reinjection_smtp_server'));
 
 # Get current time (before changing locale)
-#$now = strftime("%d-%b-%Y", localtime);
 $now = strftime("%Y-%m-%d", localtime);
 
 $vars->{base64} = sub {
@@ -94,11 +93,41 @@ $cipher = new Crypt::CBC(&conf('encryption_secret_key'), 'Blowfish');
 # Prepare template
 $tt = &Spamity::Web::getTemplate();
 
+# Force weekly reports to be send on Sundays
+
+
 # Select users for whom a report must be sent
 if ($db->{_module} eq 'mysql') {
-    $stmt = "SELECT username, email, lang, %s as report_last_date, IF(report_last_day,report_last_day,DATE_SUB(NOW(), INTERVAL report_freq_day DAY)) as report_last_day, report_freq_day FROM spamity_prefs WHERE report_last_day IS NULL OR ADDDATE(report_last_day, INTERVAL report_freq_day DAY) <= NOW()";
+    $stmt = << 'EOS';
+SELECT username,
+       email,
+       lang,
+       %s as report_last_date,
+       IF(report_last_day,
+          report_last_day,
+          DATE_SUB(NOW(), INTERVAL report_freq_day DAY)) as report_last_day,
+       report_freq_day 
+FROM spamity_prefs 
+WHERE report_last_day IS NULL
+      OR ADDDATE(report_last_day, INTERVAL report_freq_day DAY) <= NOW()
+EOS
 } elsif ($db->{_module} eq 'oracle') {
-    $stmt = "SELECT username, email, lang, %s as report_last_date, CASE WHEN report_last_day IS NOT NULL THEN ROUND(report_last_day, 'DDD') ELSE ROUND(SYSDATE - report_freq_day, 'DDD') END as report_last_day, report_freq_day FROM spamity_prefs WHERE report_last_day IS NULL OR (report_last_day + report_freq_day) <= SYSDATE";
+    $stmt = << 'EOS';
+SELECT username,
+       email,
+       lang,
+       %s as report_last_date,
+       CASE
+         WHEN report_last_day IS NOT NULL THEN
+           ROUND(report_last_day, 'DDD')
+         ELSE
+           ROUND(SYSDATE - report_freq_day, 'DDD')
+       END as report_last_day,
+       report_freq_day 
+FROM spamity_prefs 
+WHERE report_last_day IS NULL
+      OR (report_last_day + report_freq_day) <= SYSDATE
+EOS
 } else {                        # pgsql
     # WHERE nextdate < current_date + (months||\'months\')::interval
 }
@@ -115,13 +144,14 @@ if ($sth->execute()) {
 	
         if ($row->{report_last_date}) {
             $vars->{report_last_day} = strftime(&translate('day-format'), localtime($row->{report_last_date}));
-            #print "Last report on ",$row->{report_last_date}," (",$vars->{report_last_day},")\n";
+            $vars->{from} = strftime('%Y-%m-%d', localtime($row->{report_last_date}));
+            print "   Last report on ",$vars->{from}," (",$row->{report_freq_day},"-day interval)\n";
         } else {
-            $vars->{report_last_day} = undef;
+            $vars->{report_last_day} = $vars->{from} = undef;
         }
 	
-        %msgs = &Spamity::Web::getMessagesByDate($row->{report_last_day},  # from
-                                                 $now,                     # to
+        %msgs = &Spamity::Web::getMessagesByDate($vars->{from},            # from (YYYY-MM-DD)
+                                                 $now,                     # to (YYYY-MM-DD)
                                                  undef,
                                                  undef,
                                                  1,                        # must be qurantined
