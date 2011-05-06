@@ -155,6 +155,7 @@ use vars qw(@ISA %Lexicon);
 	    'view' => 'view',
 	    'receive' => 'receive',
 	    'Login to' => 'Login to',
+            'Stop receiving spam reports' => 'Stop receiving spam reports',
 
 	    # external.cgi
 	    'view a rejected message' => 'view a rejected message',
