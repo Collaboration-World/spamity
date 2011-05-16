@@ -5,10 +5,12 @@
       <div class="note"><label>[% i18n('frequency') %]</label><select name="freq" class="auto">
         <option value="day"[% IF prefs.report_freq_day == '1' %] selected="selected"[% END %]>[% i18n('Daily') %]</option>
 	<option value="week"[% IF prefs.report_freq_day == '7' %] selected="selected"[% END %]>[% i18n('Weekly') %]</option>
-        <option value="month"[% IF prefs.report_freq_day == '30' %] selected="selected"[% END %]>[% i18n('Monthly') %]</option></select></div>
+        <option value="month"[% IF prefs.report_freq_day == '30' %] selected="selected"[% END %]>[% i18n('Monthly') %]</option>
+      </select></div>
       <div class="note"><label>[% i18n('language') %]</label><select name="lang">
         <option value="en_US"[% IF prefs.lang == 'en_US' %] selected="selected"[% END %]>English</option>
-	<option value="fr_CA"[% IF prefs.lang == 'fr_CA' %] selected="selected"[% END %]>Français</option></select></div>
+	<option value="fr_CA"[% IF prefs.lang == 'fr_CA' %] selected="selected"[% END %]>Français</option>
+      </select></div>
       <div class="note"><label>[% i18n('email') %]</label><select name="index_email" class="auto">
 	[% FOREACH address = addresses %]<option value="[% (loop.index + 1) %]"[% IF address == prefs.email %] selected="selected"[% END %]>[% address %]</option>[% END %]
 	</select></div>[% END %]

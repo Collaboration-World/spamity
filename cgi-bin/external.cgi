@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 # -*- Mode: CPerl tab-width: 4; c-label-minimum-indentation: 4; indent-tabs-mode: nil; c-basic-offset: 4; cperl-indent-level: 4 -*-
 #
-#  Copyright (c) 2010
+#  Copyright (c) 2010-2011
 #  Author: Francis Lachapelle <francis@Sophos.ca>
 #
 #  This program is free software; you can redistribute it and/or modify
@@ -56,7 +56,9 @@ unless ($session_config->{error}) {
     if (defined $vars->{sid}) {
         $session = new CGI::Session($Spamity::Web::SESSION_DRIVER, $vars->{sid}, $session_config);
         if ($vars->{authenticated} = (defined $session->param('username') && defined $session->param('addresses'))) {
-            $vars->{prefs} = defined(&conf('amavisd-new_database', 1)) && ($session->param('addresses') || $session->param('admin'));
+            $vars->{prefs} = defined(&conf('amavisd-new_database', 1))
+                || defined(&conf('spamity_prefs_database', 1))
+                || $session->param('admin');
         }
     }
 }
@@ -71,7 +73,7 @@ unless ($db = Spamity::Database->new(database => 'spamity_prefs')) {
 
 # Parse URL
 $script = $query->url(-relative=>1);
-if ($query->url(-relative=>1, -path=>1) =~ m/$script\/+(.+)\/?$/) {
+if ($query->url(-relative=>1, -path=>1) =~ m/\Q$script\E\/+(.+)\/?$/) {
     $request = $1;
 
     # Request form:

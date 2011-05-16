@@ -42,7 +42,7 @@ my $sth;
 my $row;
 my $vars;
 my %msgs;
-
+my $success;
 
 # Establish database connection for Spamity preferences
 die $Spamity::Database::message unless ($db = Spamity::Database->new(database => 'spamity_prefs'));
@@ -94,7 +94,29 @@ $cipher = new Crypt::CBC(&conf('encryption_secret_key'), 'Blowfish');
 $tt = &Spamity::Web::getTemplate();
 
 # Force weekly reports to be send on Sundays
-
+unless (DEBUG) {
+    if ($db->{_module} eq 'oracle') {
+        $stmt = << 'EOU';
+UPDATE spamity_prefs
+SET report_last_day = 
+  CASE
+    WHEN report_last_day IS NOT NULL THEN
+      TRUNC(report_last_day, 'DAY')
+    ELSE
+      TRUNC(SYSDATE, 'DAY')
+    END
+WHERE report_freq_day = 7
+EOU
+        warn logPrefix, "[DEBUG SQL] $stmt\n" if (int(&conf('log_level')) > 0);
+        my $rows = $db->dbh->do($stmt);
+        if (!defined($rows)) {
+            print  "ERROR: Can't update report_last_day field (weekly reports): ",$db->dbh->errstr,"\n";
+        }
+        elsif ($rows > 0) {
+            print "Updated $rows entries for weekly reports.\n";
+        }
+    }
+}
 
 # Select users for whom a report must be sent
 if ($db->{_module} eq 'mysql') {
@@ -126,21 +148,20 @@ SELECT username,
        report_freq_day 
 FROM spamity_prefs 
 WHERE report_last_day IS NULL
-      OR (report_last_day + report_freq_day) <= SYSDATE
+      OR ROUND((report_last_day + report_freq_day), 'DDD') <= SYSDATE
 EOS
 } else {                        # pgsql
     # WHERE nextdate < current_date + (months||\'months\')::interval
 }
 
 $stmt = sprintf($stmt, $db->getUnixTime('report_last_day'));
-
 warn logPrefix, "[DEBUG SQL] $stmt\n" if (int(&conf('log_level')) > 0);
-
 $sth = $db->dbh->prepare($stmt);
 if ($sth->execute()) {
     while ($row = $sth->fetchrow_hashref(NAME_lc)) {
         print $row->{username}," (",$row->{lang},")\n";
         &setLanguage($row->{lang});
+        $success = 1;
 	
         if ($row->{report_last_date}) {
             $vars->{report_last_day} = strftime(&translate('day-format'), localtime($row->{report_last_date}));
@@ -220,26 +241,31 @@ if ($sth->execute()) {
             else {
                 $mailObj = Mail::Internet->new([ split /\n/, $mail ]);
                 if (&Spamity::Quarantine::sendMail($vars->{sender}, $vars->{recipient}, $mailObj)) {
-                    print "Report sent to ",$vars->{recipient},"\n";
-                
-                    # Update database
-                    if ($db->{_module} eq 'mysql' || $db->{_module} eq 'pgsql') {
-                        $stmt = "UPDATE spamity_prefs SET report_last_day = NOW() WHERE username = '".$row->{username}."'";
-                    }
-                    elsif ($db->{_module} eq 'oracle') {
-                        $stmt = "UPDATE spamity_prefs SET report_last_day = SYSDATE WHERE username = '".$row->{username}."'";
-                    }
-                    unless ($db->dbh->do($stmt)) {
-                        print  "ERROR: Can't update report_last_day field: ",$db->dbh->errstr,"\n";
-                    }
+                    print "Report sent to ",$vars->{recipient},"\n";                
                 }
                 else {
+                    $success = 0;
                     print "ERROR: Can't send report to ",$vars->{recipient},"\n";
                 }
             }
         }
         else {
             warn "No spam for ",$row->{username},"\n";
+        }
+
+        unless (DEBUG) {
+            if ($success) {
+                # Update database
+                if ($db->{_module} eq 'mysql' || $db->{_module} eq 'pgsql') {
+                    $stmt = "UPDATE spamity_prefs SET report_last_day = NOW() WHERE username = '".$row->{username}."'";
+                }
+                elsif ($db->{_module} eq 'oracle') {
+                    $stmt = "UPDATE spamity_prefs SET report_last_day = SYSDATE WHERE username = '".$row->{username}."'";
+                }
+                unless ($db->dbh->do($stmt)) {
+                    print  "ERROR: Can't update report_last_day field: ",$db->dbh->errstr,"\n";
+                }
+            }
         }
     }
 }
