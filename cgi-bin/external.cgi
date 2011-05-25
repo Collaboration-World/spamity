@@ -108,7 +108,7 @@ if ($query->url(-relative=>1, -path=>1) =~ m/\Q$script\E\/+(.+)\/?$/) {
             my $stmt = "SELECT lang FROM spamity_prefs WHERE username = '$username'";
             my $sth = $db->dbh->prepare($stmt);
             if ($sth->execute()) {
-                if (my $row = $sth->fetchrow_hashref()) {
+                if (my $row = $sth->fetchrow_hashref(NAME_lc)) {
                     $vars->{lang} = $row->{lang};
                     &setLanguage($vars->{lang});
                     

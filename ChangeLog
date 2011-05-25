@@ -1,3 +1,8 @@
+2011-05-25  Francis Lachapelle  <flachapelle@inverse.ca>
+
+	* cgi-bin/external.cgi: forced the hash keys of the SQL query that
+	fetches the user's language to be in lowercase.
+
 2011-05-16  Francis Lachapelle  <flachapelle@inverse.ca>
 
 	* bin/spamity_mail_report: update the preferences of all users
