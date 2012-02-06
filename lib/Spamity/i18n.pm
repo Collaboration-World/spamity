@@ -49,7 +49,7 @@ sub language_name
 
 sub encoding
 {
-    'iso-8859-1' # Latin-1
+  'utf-8';
 }
 
     

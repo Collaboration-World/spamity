@@ -426,6 +426,7 @@ sub formatMessage
       if ($msg->{day} =~ m/\b([[:alpha:]]+)\b/) {
           my $month = $1;
           $msg->{day} =~ s/$month/&translate($month)/e;
+          $msg->{day} = encode(Spamity::i18n::encoding, $msg->{day});
       }
       $msg->{logtime} = strftime(&translate('time-format'), localtime($msg->{logepoch}));
 
@@ -461,8 +462,8 @@ sub getMessagesByDate
 
       $db = Spamity::Database->new(database => 'spamity');
 
-      push(@columns, 'id', 'logdate', 'logepoch', 'to_addr', 'from_addr', 'filter_type', 'filter_id', 'description', 'rawsource_length');
-      $stmt = sprintf('select %%s as id, logdate, %s as logepoch, %s as to_addr, %s as from_addr, filter_type, filter_id, description, %s as rawsource_length from spamity%%s',
+      push(@columns, 'id', 'username', 'logdate', 'logepoch', 'to_addr', 'from_addr', 'filter_type', 'filter_id', 'description', 'rawsource_length');
+      $stmt = sprintf('select %%s as id, username, logdate, %s as logepoch, %s as to_addr, %s as from_addr, filter_type, filter_id, description, %s as rawsource_length from spamity%%s',
                       $db->getUnixTime('logdate'),
                       $db->concatenate(qw/to_user '@' to_host/),
                       $db->concatenate(qw/from_user '@' from_host/),
@@ -582,7 +583,7 @@ sub getMessagesByDate
                                           $db->formatUnion($stmt));
       }
 
-      warn "[DEBUG SQL] Spamity::Web getMessagesByDate $stmt\n" if (int(&conf('log_level', 1)) > 0);
+      warn logPrefix, "[DEBUG SQL] Spamity::Web getMessagesByDate $stmt\n" if (int(&conf('log_level', 1)) > 0);
 
       $sth = $db->dbh->prepare($stmt);
       if ($sth && $sth->execute()) {
