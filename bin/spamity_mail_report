@@ -30,7 +30,7 @@ use Crypt::CBC;
 use Crypt::Blowfish;
 
 use constant {
-    DEBUG => 0
+    DEBUG => 1
 };
 
 my $db;
@@ -138,13 +138,13 @@ EOS
 SELECT username,
        email,
        lang,
-       %s as report_last_date,
+       %s AS last_unix_date,
        CASE
          WHEN report_last_day IS NOT NULL THEN
            ROUND(report_last_day, 'DDD')
          ELSE
            ROUND(SYSDATE - report_freq_day, 'DDD')
-       END as report_last_day,
+       END AS last_date,
        report_freq_day 
 FROM spamity_prefs 
 WHERE report_last_day IS NULL
@@ -159,16 +159,16 @@ warn logPrefix, "[DEBUG SQL] $stmt\n" if (int(&conf('log_level')) > 0);
 $sth = $db->dbh->prepare($stmt);
 if ($sth->execute()) {
     while ($row = $sth->fetchrow_hashref(NAME_lc)) {
-        print $row->{username}," (",$row->{lang},")\n";
+        print $row->{username}," (",$row->{lang},"/",$row->{report_freq_day},"-day period/20",$row->{last_date},")\n";
         &setLanguage($row->{lang});
         $success = 1;
 	
-        if ($row->{report_last_date}) {
-            $vars->{report_last_day} = strftime(&translate('day-format'), localtime($row->{report_last_date}));
-            $vars->{from} = strftime('%Y-%m-%d', localtime($row->{report_last_date}));
+        if ($row->{last_unix_date}) {
+            $vars->{report_last_day} = strftime(&translate('day-format'), localtime($row->{last_unix_date}));
+            $vars->{from} = strftime('%Y-%m-%d', localtime($row->{last_unix_date}));
             print "   Last report on ",$vars->{from}," (",$row->{report_freq_day},"-day interval)\n";
         } else {
-            $vars->{report_last_day} = $vars->{from} = undef;
+            $vars->{report_last_day} = $vars->{from} = '20'.$row->{last_date};
         }
 	
         %msgs = &Spamity::Web::getMessagesByDate($vars->{from},            # from (YYYY-MM-DD)
