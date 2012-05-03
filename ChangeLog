@@ -1,3 +1,7 @@
+2012-05-03  Francis Lachapelle  <flachapelle@inverse.ca>
+
+	* sbin/spamityd: added support for rejected client hosts.
+
 2011-05-25  Francis Lachapelle  <flachapelle@inverse.ca>
 
 	* cgi-bin/external.cgi: forced the hash keys of the SQL query that
